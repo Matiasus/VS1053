@@ -7,7 +7,7 @@ Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fil
 C library is aimed for driving [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus.
 
 ## Hardware connection
-| PORT LCD | PORT ATMEGA328P | Description |
+| PIN VS1053 | PIN ATMEGA328P | Description |
 | :---: | :---: |  :---: |
 | 5V | 5V | Supply Voltage |
 | AGND | GND | Ground |
