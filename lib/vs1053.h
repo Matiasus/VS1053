@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       19.10.2022
  * @file        vs1053.h
- * @update      19.10.2022
+ * @update      21.10.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -25,7 +25,8 @@
 #define __VS1053_H__
 
   // PORT
-  #define PORT
+  #define VS1053_DDR
+  #define VS1053_PORT
 
   // PIN
   #define SCLK
@@ -109,14 +110,14 @@
    *
    * @return  void
    */
-  void WriteSci(uint8_t addr, uint16_t data) 
+  void VS1053_WriteSci(uint8_t addr, uint16_t data) 
   {
     WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
     CLR_BIT(PORT, XCS);                   // Activate xCS
-    WriteSpiByte(WRITE);                  // Write command code
-    WriteSpiByte(addr);                   // SCI register number
-    WriteSpiByte((uint8_t)(data >> 8));   // High byte
-    WriteSpiByte((uint8_t)(data & 0xFF)); // Low byte
+    SPI_WriteByte(WRITE);                 // Write command code
+    SPI_WriteByte(addr);                  // SCI register number
+    SPI_WriteByte((uint8_t)(data >> 8));  // High byte
+    SPI_WriteByte((uint8_t)(data & 0xFF));// Low byte
     SET_BIT(PORT, XCS);                   // Deactivate xCS
   }
   
@@ -127,15 +128,15 @@
    *
    * @return  uint16_t
    */
-  uint16_t ReadSci(uint8_t addr) 
+  uint16_t VS1053_ReadSci(uint8_t addr) 
   {
     uint16_t data;
     WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
     CLR_BIT(PORT, XCS);                   // Activate xCS
-    WriteSpiByte(READ);                   // Read command code
-    WriteSpiByte(addr);                   // SCI register number
-    data = (uint16_t)ReadSpiByte() << 8;  // High byte 
-    data |= ReadSpiByte();                // Low byte
+    SPI_WriteByte(READ);                  // Read command code
+    SPI_WriteByte(addr);                  // SCI register number
+    data = (uint16_t)SPI_ReadByte() << 8; // High byte 
+    data |= SPI_ReadByte();               // Low byte
     SET_BIT(PORT, XCS);                   // Deactivate xCS
     return data;                          // Return content
   }
@@ -148,7 +149,7 @@
    *
    * @return  int
    */  
-  int WriteSdi(const uint8_t *data, uint8_t bytes) 
+  int VS1053_WriteSdi(const uint8_t *data, uint8_t bytes) 
   {
     uint8_t i;
     
@@ -159,11 +160,31 @@
     WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
     CLR_BIT(PORT, XDCS);                  // Activate xDCS
     for (i = 0; i < bytes; i++) {
-      WriteSpiByte(*data++);
+      SPI_WriteByte(*data++);
     }
     SET_BIT(PORT, XDCS);                  // Deactivate xDCS
     
     return 0;                             // Success
   }
+  
+  /**
+   * @desc    Set DDR
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void VS1053_SetDDR(void)
+  {
+    // OUTPUT 
+    SET_BIT(VS1053_DDR, MOSI);
+    SET_BIT(VS1053_DDR, SCLK);
+    SET_BIT(VS1053_DDR, XCS);
+    SET_BIT(VS1053_DDR, XDCS);
+    
+    // INPUT
+    CLR_BIT(VS1053_DDR, DREQ);
+    CLR_BIT(VS1053_DDR, MISO);
+  }  
 
 #endif
