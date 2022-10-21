@@ -1,10 +1,10 @@
 # Library for VS1053
 
 ## VS1053 Description
-Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf)
+Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf).
 
 ## Library
-C library is aimed for driving [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus.
+C library is aimed for driving [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC ](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus.
 
 ## Hardware connection
 | PIN VS1053 | PIN ATMEGA328P | Description |
