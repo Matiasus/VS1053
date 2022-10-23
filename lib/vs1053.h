@@ -24,18 +24,20 @@
 #ifndef __VS1053_H__
 #define __VS1053_H__
 
+  #include <avr/io.h>
+
   // PORT
-  #define VS1053_DDR
-  #define VS1053_PORT
+  #define VS1053_DDR       DDRB
+  #define VS1053_PORT     PORTB
 
   // PIN
-  #define SCLK
-  #define MOSI
-  #define MISO
-  #define DREQ
-  #define  XCS
-  #define XRST
-  #define XDCS
+  #define SCLK                1
+  #define MOSI                2
+  #define MISO                3
+  #define DREQ                4
+  #define  XCS                5
+  #define XRST                6
+  #define XDCS                7
 
   // REGISTERS
   #define SCI_MODE          0x0  // Mode control  
@@ -77,10 +79,10 @@
   // SCI_STATUS contains information on the current status of VS1053b. It also controls some
   // low-level things that the user does not usually have to care about
   #define SS_DO_NOT_JUMP     15  // Header in decode, do not fast forward/rewind
-  #define SS_SWING        14:12  // Set swing to +0 dB, +0.5 dB, .., or +3.5 dB
+//  #define SS_SWING        14:12  // Set swing to +0 dB, +0.5 dB, .., or +3.5 dB
   #define SS_VCM_OVERLOAD    11  // GBUF overload indicator ’1’ = overload
   #define SS_VCM_DISABLE     10  // GBUF overload detection ’1’ = disable
-  #define SS_VER            7:4  // Version
+//  #define SS_VER            7:4  // Version
   #define SS_APDOWN2          3  //
   #define SS_APDOWN1          2  //
   #define SS_AD_CLOCK         1  //
@@ -100,7 +102,7 @@
   // bit is set?
   #define IS_BIT_SET(port, bit)             ( ((port) & (1 << (bit))) ? 1 : 0 )
   // wait until bit is set
-  #define WAIT_UNTIL_BIT_IS_SET(port, bit)  { while (IS_BIT_CLR(port, bit)); }  
+  #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }  
 
   /**
    * @desc    Write Serial Command Instruction
@@ -110,16 +112,7 @@
    *
    * @return  void
    */
-  void VS1053_WriteSci(uint8_t addr, uint16_t data) 
-  {
-    WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
-    CLR_BIT(PORT, XCS);                   // Activate xCS
-    SPI_WriteByte(WRITE);                 // Write command code
-    SPI_WriteByte(addr);                  // SCI register number
-    SPI_WriteByte((uint8_t)(data >> 8));  // High byte
-    SPI_WriteByte((uint8_t)(data & 0xFF));// Low byte
-    SET_BIT(PORT, XCS);                   // Deactivate xCS
-  }
+  void VS1053_WriteSci (uint8_t, uint16_t);
   
   /**
    * @desc    Read Serial Command Instruction
@@ -128,18 +121,7 @@
    *
    * @return  uint16_t
    */
-  uint16_t VS1053_ReadSci(uint8_t addr) 
-  {
-    uint16_t data;
-    WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
-    CLR_BIT(PORT, XCS);                   // Activate xCS
-    SPI_WriteByte(READ);                  // Read command code
-    SPI_WriteByte(addr);                  // SCI register number
-    data = (uint16_t)SPI_ReadByte() << 8; // High byte 
-    data |= SPI_ReadByte();               // Low byte
-    SET_BIT(PORT, XCS);                   // Deactivate xCS
-    return data;                          // Return content
-  }
+  uint16_t VS1053_ReadSci (uint8_t);
   
   /**
    * @desc    Write Serial Data
@@ -149,23 +131,7 @@
    *
    * @return  int
    */  
-  int VS1053_WriteSdi(const uint8_t *data, uint8_t bytes) 
-  {
-    uint8_t i;
-    
-    if (bytes > 32) {                     // Error: Too many bytes to transfer!
-      return -1;
-    }
-       
-    WAIT_UNTIL_BIT_IS_SET(PORT, DREQ);    // Wait until DREQ is high
-    CLR_BIT(PORT, XDCS);                  // Activate xDCS
-    for (i = 0; i < bytes; i++) {
-      SPI_WriteByte(*data++);
-    }
-    SET_BIT(PORT, XDCS);                  // Deactivate xDCS
-    
-    return 0;                             // Success
-  }
+  int VS1053_WriteSdi (const uint8_t *, uint8_t);
   
   /**
    * @desc    Set DDR
@@ -174,17 +140,6 @@
    *
    * @return  void
    */
-  void VS1053_SetDDR(void)
-  {
-    // OUTPUT 
-    SET_BIT(VS1053_DDR, MOSI);
-    SET_BIT(VS1053_DDR, SCLK);
-    SET_BIT(VS1053_DDR, XCS);
-    SET_BIT(VS1053_DDR, XDCS);
-    
-    // INPUT
-    CLR_BIT(VS1053_DDR, DREQ);
-    CLR_BIT(VS1053_DDR, MISO);
-  }  
+  void VS1053_SetDDR (void);
 
 #endif

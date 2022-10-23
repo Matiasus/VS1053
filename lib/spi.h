@@ -7,8 +7,8 @@
  *
  * @author      Marian Hrinko
  * @datum       21.10.2022
- * @file        spi.c
- * @update      21.10.2022
+ * @file        spi.h
+ * @update      23.10.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -22,6 +22,8 @@
  
 #ifndef __SPI_H__
 #define __SPI_H__
+
+  #include <avr/io.h>
 
   // atmega328p
   #if defined(__AVR_ATmega328P__)
@@ -38,8 +40,12 @@
     #define SPI_SPDR          SPDR
     
   #endif
-  
 
+  // clear bit
+  #define CLR_BIT(port, bit)                ( ((port) &= ~(1 << (bit))) )
+  // set bit
+  #define SET_BIT(port, bit)                ( ((port) |= (1 << (bit))) )
+  
   /**
    * @desc    SPI Master Mode Init
    *
@@ -47,18 +53,7 @@
    *
    * @return  void
    */
-  SPI_MasterInit(void);
-  {
-    SET_BIT (SPI_DDR, SPI_CS);       // as OUTPUT
-    SET_BIT (SPI_DDR, SPI_SCK);      // as OUTPUT
-    SET_BIT (SPI_DDR, SPI_MOSI);     // as OUTPUT
-    CLR_BIT (SPI_DDR, SPI_MISO);     // as INTPUT
-    
-    SET_BIT (SPI_SPCR, SPE);         // SPE  - SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator,
-    SET_BIT (SPI_SPCR, MSTR);        // MSTR - Master device
-    SET_BIT (SPI_SPCR, SPR0);        // SPEED - Prescaler fclk/16 = 1MHz
-    SET_BIT (SPI_SPCR, SPI2X);       // SPI2X - SPEED * 2 = 2MHz
-  }
+  void SPI_MasterInit (void);
 
   /**
    * @desc    SPI Write Byte
@@ -67,11 +62,7 @@
    *
    * @return  void
    */   
-  void SPI_WriteByte(uint8_t data);
-  {
-    SPI_SPDR = data;                // Start transmission
-    while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete
-  }
+  void SPI_WriteByte (uint8_t);
    
   /**
    * @desc    SPI Read Byte
@@ -80,13 +71,7 @@
    *
    * @return  uint8_t
    */   
-   uint8_t SPI_ReadByte(void)
-   {
-    SPI_SPDR = 0xFF;                // Start transmission, fill dummy byte
-    while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete
-
-    return SPI_SPDR;                // Read received data
-   }
+  uint8_t SPI_ReadByte (void);
    
   /**
    * @desc    SPI Write / Read Byte
@@ -95,12 +80,6 @@
    *
    * @return  uint8_t
    */   
-   uint8_t SPI_WriteReadByte(uint8_t data)
-   {
-    SPI_SPDR = data;                // Start transmission
-    while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete          
-    
-    return SPI_SPDR;                // Read received data
-   }   
+   uint8_t SPI_WriteReadByte (uint8_t);  
 
 #endif
