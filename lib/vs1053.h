@@ -102,7 +102,25 @@
   // bit is set?
   #define IS_BIT_SET(port, bit)             ( ((port) & (1 << (bit))) ? 1 : 0 )
   // wait until bit is set
-  #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }  
+  #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }
+
+  /**
+   * @desc   Test SDI - sine test
+   *
+   * @param   void
+   *
+   * @return  void
+   */  
+  void VS1053_TestSdi (void);
+
+  /**
+   * @desc   Test SCI
+   *
+   * @param   void
+   *
+   * @return  void
+   */  
+  void VS1053_TestSci (void);
 
   /**
    * @desc    Write Serial Command Instruction
