@@ -105,7 +105,7 @@
   #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }
 
   /**
-   * @desc   Test SDI - sine test
+   * @desc    Test SDI - sine test
    *
    * @param   void
    *
@@ -114,7 +114,7 @@
   void VS1053_TestSdi (void);
 
   /**
-   * @desc   Test SCI
+   * @desc    Test SCI
    *
    * @param   void
    *
