@@ -26,6 +26,38 @@
 
 /**
  * @desc    Test SDI - sine test
+ * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_Reset (void) 
+{
+  CLR_BIT (VS1053_PORT, XRST);        // Activate XRST
+  _delay_ms (1);
+  SPI_WriteByte (0xFF);               // Send dummy SPI byte to initialize SPI
+  SET_BIT (VS1053_PORT, XCS);         // Deactivate xCS / Un-reset MP3 chip
+  SET_BIT (VS1053_PORT, XDCS);        // Deactivate xDCS
+  SET_BIT (VS1053_PORT, XRST);        // Deactivate XRST
+  
+  VS1053_SetVolume (0xff,0xff);       // set volume
+  SPI_WriteByte (0xAC45);             // Send dummy SPI byte to initialize SPI
+  while (!MP3_DREQ);                  // Wait for DREQ
+
+  SPI_WriteByte (SPI_AUDATA, 0x0010); // Slow sample rate for slow analog part startup 10 Hz
+  _delay_ms (100);
+  
+  VS1053_SetVolume (0xfe,0xfe);        // Switch on the analog parts
+  SPI_WriteByte (SPI_AUDATA, 31, 64);  // 8kHz
+  VS1053_SetVolume (20,20);
+  
+  Mp3SoftReset();
+  SPISetFastClock();  
+}
+
+/**
+ * @desc    Test SDI - sine test
  *
  * @param   void
  *
