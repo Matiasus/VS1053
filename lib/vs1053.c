@@ -25,7 +25,7 @@
 #include "vs1053.h"
 
 /**
- * @desc   Test SDI - sine test
+ * @desc    Test SDI - sine test
  *
  * @param   void
  *
@@ -57,7 +57,7 @@ void VS1053_TestSdi (void)
 }
 
 /**
- * @desc   Test SCI
+ * @desc    Test SCI
  *
  * @param   void
  *
