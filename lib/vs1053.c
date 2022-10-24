@@ -25,6 +25,59 @@
 #include "vs1053.h"
 
 /**
+ * @desc   Test SDI - sine test
+ *
+ * @param   void
+ *
+ * @return  void
+ */  
+void VS1053_TestSdi (void) 
+{
+  uint8_t datain[] = {0x53, 0xEF, 0x6E, 0x30, 0, 0, 0, 0};
+  uint8_t dataout[] = {0x45, 0x78, 0x69, 0x74};  
+  
+  while (1) {
+    CLR_BIT (VS1053_PORT, XCS);          // Activate xCS
+    VS1053_WriteSci (0x00, 0x0820)       // 
+    SET_BIT (VS1053_PORT, XCS);          // Deactivate xCS
+    wait for dreq up
+    
+    CLR_BIT (VS1053_PORT, XCS);          // Activate xCS
+    VS1053_WriteSdi (*datain, 8);        // 
+    wait for dreq up
+    SET_BIT (VS1053_PORT, XCS);          // Deactivate xCS
+    _delay_ms(500);                      // delay 500ms
+    
+    CLR_BIT (VS1053_PORT, XCS);          // Activate xCS
+    VS1053_WriteSdi (*dataout, 4);       // 
+    wait for dreq up
+    SET_BIT (VS1053_PORT, XCS);          // Deactivate xCS    
+    _delay_ms(500);                      // delay 500ms
+  }  
+}
+
+/**
+ * @desc   Test SCI
+ *
+ * @param   void
+ *
+ * @return  void
+ */  
+void VS1053_TestSci (void) 
+{
+  while (1) {
+    CLR_BIT (VS1053_PORT, XCS);          // Activate xCS
+    VS1053_WriteSci (0x0B, 0x0000)       // Set full volume
+    SET_BIT (VS1053_PORT, XCS);          // Deactivate xCS
+    _delay_ms(500);                      // delay 500ms
+    CLR_BIT (VS1053_PORT, XCS);          // Activate xCS
+    VS1053_WriteSci (0x0B, 0xFFFF)       // Set full volume
+    SET_BIT (VS1053_PORT, XCS);          // Deactivate xCS
+    _delay_ms(500);                      // delay 500ms
+  }
+}
+
+/**
  * @desc    Write Serial Command Instruction
  *
  * @param   uint8_t addr
