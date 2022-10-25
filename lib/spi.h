@@ -29,6 +29,7 @@
   #if defined(__AVR_ATmega328P__)
 
     #define SPI_DDR           DDRB
+    #define SPI_PORT          PORTB
     #define SPI_SCK           5     // or SCLK
     #define SPI_MISO          4     // or DO
     #define SPI_MOSI          3     // or SDA, SDI, DI
