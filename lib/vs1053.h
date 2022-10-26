@@ -107,6 +107,26 @@
   #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }
 
   /**
+   * @desc    Hard reset
+   * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void VS1053_Reset (void);
+
+  /**
+   * @desc    Soft reset
+   * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a2
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void VS1053_SoftReset (void);
+
+  /**
    * @desc    Test SDI - sine test
    *
    * @param   void
