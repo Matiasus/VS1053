@@ -81,17 +81,18 @@ void VS1053_Reset (void)
  *
  * @return  void
  */
-void VS1053_SoftReset (void) 
+void VS1053_SoftReset (void)
 {
-  // new mode, reset
-  SPI_WriteByte (SPI_MODE, 0x0840);
+  // VS10xx native SPI modes, Soft reset
+  SPI_WriteByte (SPI_MODE, 0x0804);
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
   WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
   
   // Set clock register 44100Hz, stereo
-  SPI_WriteByte (0xAC45); // 0x9ccc in source code
+  // 0x9ccc in source code
+  SPI_WriteByte (0xAC45);
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
@@ -99,14 +100,11 @@ void VS1053_SoftReset (void)
 
   // Select data
   CLR_BIT (VS1053_PORT, VS1053_XDCS);
-  // Send code
-  SPI_WriteByte (0x00);
-  // Send code
-  SPI_WriteByte (0x00);
-  // Send code
-  SPI_WriteByte (0x00);
-  // Send code
-  SPI_WriteByte (0x00);
+  // Send 4 x 0
+  SPI_WriteByte (0);
+  SPI_WriteByte (0);
+  SPI_WriteByte (0);
+  SPI_WriteByte (0);
   // wait for SPI ready to send
   SPI_ReadByte ();  
   // DESelect data
@@ -125,7 +123,7 @@ void VS1053_TestSdi (void)
   uint8_t datain[] = {0x53, 0xEF, 0x6E, 0x30, 0, 0, 0, 0};
   uint8_t dataout[] = {0x45, 0x78, 0x69, 0x74};  
   
-  while (1) 
+  while (1)
   {
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
@@ -144,7 +142,8 @@ void VS1053_TestSdi (void)
     WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
     // Deactivate xCS
     SET_BIT (VS1053_PORT, VS1053_XCS);
-    _delay_ms(500);
+    // delay
+    _delay_ms (500);
 
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
@@ -153,8 +152,9 @@ void VS1053_TestSdi (void)
     // Wait until DREQ is high
     WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
     // Deactivate xCS
-    SET_BIT (VS1053_PORT, VS1053_XCS);   
-    _delay_ms(500);
+    SET_BIT (VS1053_PORT, VS1053_XCS);
+    // delay
+    _delay_ms (500);
   }  
 }
 
@@ -173,7 +173,8 @@ void VS1053_TestSci (void)
     // Set full volume
     VS1053_WriteSci (0x0B, 0x0000);
     // Deactivate xCS               
-    SET_BIT (VS1053_PORT, VS1053_XCS);           
+    SET_BIT (VS1053_PORT, VS1053_XCS);
+    // delay
     _delay_ms (500);
     // Activate xCS           
     CLR_BIT (VS1053_PORT, VS1053_XCS);
@@ -181,6 +182,7 @@ void VS1053_TestSci (void)
     VS1053_WriteSci (0x0B, 0xFFFF);
     // Deactivate xCS           
     SET_BIT (VS1053_PORT, VS1053_XCS);
+    // delay
     _delay_ms (500);
   }
 }
