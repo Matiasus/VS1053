@@ -25,7 +25,7 @@
 #include "vs1053.h"
 
 /**
- * @desc    Test SDI - sine test
+ * @desc    Hard reset
  * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
  *
  * @param   void
@@ -40,22 +40,24 @@ void VS1053_Reset (void)
   _delay_ms (1);
   // Send dummy SPI byte to initialize SPI
   SPI_WriteByte (0xFF);
-  // Deactivate xCS / Un-reset MP3 chip
+  
+  // Un-reset MP3 chip
+  // Deactivate xCS
   SET_BIT (VS1053_PORT, VS1053_XCS);
   // Deactivate xDCS
   SET_BIT (VS1053_PORT, VS1053_XDCS);
   // Deactivate XRST
   SET_BIT (VS1053_PORT_RES, VS1053_XRST);
-/*
   // set volume - lowest level
   VS1053_SetVolume (0xff,0xff);
-  // Send 44100Hz with 2 cannal / stereo
+  
+  // Set clock register 44100Hz, stereo
   SPI_WriteByte (0xAC45);
   // Wait until DREQ is high
   WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
 
   // Slow sample rate for slow analog part startup 10 Hz
-  SPI_WriteByte (SPI_AUDATA, 0x0010);
+  SPI_WriteByte (SPI_AUDATA, 0x000A);
   // delay
   _delay_ms (100);
   
@@ -65,10 +67,50 @@ void VS1053_Reset (void)
   SPI_WriteByte (SPI_AUDATA, 0x1F41);
   // Set volume level
   VS1053_SetVolume (0x14,0x14);
- 
-  Mp3SoftReset();
-  SPISetFastClock();  
-*/
+
+  // soft reset
+  VS1053_SoftReset();
+  //SPISetFastClock();  
+}
+
+/**
+ * @desc    Soft reset
+ * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a2
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_SoftReset (void) 
+{
+  // new mode, reset
+  SPI_WriteByte (SPI_MODE, 0x0840);
+  // delay
+  _delay_ms (1);
+  // Wait until DREQ is high
+  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  
+  // Set clock register 44100Hz, stereo
+  SPI_WriteByte (0xAC45); // 0x9ccc in source code
+  // delay
+  _delay_ms (1);
+  // Wait until DREQ is high
+  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+
+  // Select data
+  CLR_BIT (VS1053_PORT, VS1053_XDCS);
+  // Send code
+  SPI_WriteByte (0x00);
+  // Send code
+  SPI_WriteByte (0x00);
+  // Send code
+  SPI_WriteByte (0x00);
+  // Send code
+  SPI_WriteByte (0x00);
+  // wait for SPI ready to send
+  SPI_ReadByte ();  
+  // DESelect data
+  SET_BIT (VS1053_PORT, VS1053_XDCS);  
 }
 
 /**
