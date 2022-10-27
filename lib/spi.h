@@ -48,13 +48,31 @@
   #define SET_BIT(port, bit)                ( ((port) |= (1 << (bit))) )
   
   /**
-   * @desc    SPI Master Mode Init
+   * @desc    SPI Port Init
    *
    * @param   void
    *
    * @return  void
    */
-  void SPI_MasterInit (void);
+  void SPI_PortInit (void);
+
+  /**
+   * @desc    SPI Slow Speed Init
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void SPI_SlowSpeedInit (void);
+
+  /**
+   * @desc    SPI Fast Speed Init
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void SPI_FastSpeedInit (void);
 
   /**
    * @desc    SPI Write Byte
