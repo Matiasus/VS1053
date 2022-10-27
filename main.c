@@ -22,6 +22,7 @@
  */
 
 #include "lib/vs1053.h"
+#include "lib/lcd/ssd1306.h"
 
 /**
  * @desc    Main function
@@ -32,6 +33,23 @@
  */
 int main (void)
 {
+  uint8_t addr = SSD1306_ADDRESS;
+
+  // LCD SSD1306
+  // ------------------------------------------------- 
+  // init ssd1306
+  SSD1306_Init (addr);
+  // clear screen
+  SSD1306_ClearScreen ();
+  // draw line
+  SSD1306_DrawLine (0, MAX_X, 4, 4);
+  // set position
+  SSD1306_SetPosition (7, 1);
+  // draw string
+  SSD1306_DrawString ("SSD1306 OLED DRIVER"); 
+
+  // MP3 ENCODER
+  // -------------------------------------------------  
   // init VS1053
   VS1053_Init ();
 
