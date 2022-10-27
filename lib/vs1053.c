@@ -25,6 +25,45 @@
 #include "vs1053.h"
 
 /**
+ * @desc    Init
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_Init (void)
+{
+  // SET_BIT (VS1053_DDR, VS1053_MOSI);
+  // SET_BIT (VS1053_DDR, VS1053_SCLK);
+  // SET_BIT (VS1053_DDR, VS1053_XCS);
+  // CLR_BIT (VS1053_DDR, VS1053_MISO)
+  SPI_MasterInit ();
+
+  SET_BIT (VS1053_DDR, VS1053_XDCS); 
+  CLR_BIT (VS1053_DDR, VS1053_DREQ);
+  SET_BIT (VS1053_DDR_RES, VS1053_XRST);
+  
+  // init reset routine
+  VS1053_Reset ();
+}
+
+/**
+ * @desc    Set volume
+ *
+ * @param   uint8_t
+ * @param   uint8_t
+ *
+ * @return  void
+ */
+void VS1053_SetVolume (uint8_t left, uint8_t right)
+{
+  // set volume integer
+  uint16_t volume = (left << 8) | right; 
+  // send command
+  VS1053_WriteSci (SCI_VOL, volume);
+}
+
+/**
  * @desc    Hard reset
  * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
  *
@@ -52,19 +91,19 @@ void VS1053_Reset (void)
   VS1053_SetVolume (0xff,0xff);
   
   // Set clock register 44100Hz, stereo
-  SPI_WriteByte (0xAC45);
+  SPI_WriteWord (0xAC45);
   // Wait until DREQ is high
   WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
 
   // Slow sample rate for slow analog part startup 10 Hz
-  SPI_WriteByte (SPI_AUDATA, 0x000A);
+  VS1053_WriteSci (SCI_AUDATA, 0x000A);
   // delay
   _delay_ms (100);
   
   // Switch on the analog parts
   VS1053_SetVolume (0xfe,0xfe);
   // 8kHz, mono
-  SPI_WriteByte (SPI_AUDATA, 0x1F41);
+  VS1053_WriteSci (SCI_AUDATA, 0x1F41);
   // Set volume level
   VS1053_SetVolume (0x14,0x14);
 
@@ -84,7 +123,7 @@ void VS1053_Reset (void)
 void VS1053_SoftReset (void)
 {
   // VS10xx native SPI modes, Soft reset
-  SPI_WriteByte (SPI_MODE, 0x0804);
+  VS1053_WriteSci (SCI_MODE, 0x0804);
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
@@ -92,7 +131,7 @@ void VS1053_SoftReset (void)
   
   // Set clock register 44100Hz, stereo
   // 0x9ccc in source code
-  SPI_WriteByte (0xAC45);
+  SPI_WriteWord (0xAC45);
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
@@ -269,46 +308,4 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
   SET_BIT (VS1053_PORT, VS1053_XDCS);
   // Success
   return 0;
-}
-
-/**
- * @desc    Init
- *
- * @param   void
- *
- * @return  void
- */
-void VS1053_Init (void)
-{
-  // SET_BIT (VS1053_DDR, VS1053_MOSI);
-  // SET_BIT (VS1053_DDR, VS1053_SCLK);
-  // SET_BIT (VS1053_DDR, VS1053_XCS);
-  // CLR_BIT (VS1053_DDR, VS1053_MISO)
-  SPI_MasterInit ();
-
-  SET_BIT (VS1053_DDR, VS1053_XDCS); 
-  CLR_BIT (VS1053_DDR, VS1053_DREQ);
-  
-  // reset
-  SET_BIT (VS1053_DDR_RES, VS1053_XRST);
-  
-  // init reset routine
-  VS1053_Reset ();
-}
-
-
-/**
- * @desc    Set volume
- *
- * @param   uint8_t
- * @param   uint8_t
- *
- * @return  void
- */
-void VS1053_SetVolume (uint8_t left, uint8_t right)
-{
-  // set volume integer
-  uint16_t volume = (left << 8) | right; 
-  // send command
-  VS1053_WriteSci (SCI_VOL, volume);
 }

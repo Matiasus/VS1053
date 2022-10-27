@@ -46,7 +46,7 @@ int main (void)
   // set position
   SSD1306_SetPosition (7, 1);
   // draw string
-  SSD1306_DrawString ("SSD1306 OLED DRIVER"); 
+  SSD1306_DrawString ("VS1053 DRIVER TEST"); 
 
   // MP3 ENCODER
   // -------------------------------------------------  
