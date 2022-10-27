@@ -64,6 +64,15 @@
    * @return  void
    */   
   void SPI_WriteByte (uint8_t);
+
+  /**
+   * @desc    SPI Write Word / big endian (MSB first)
+   *
+   * @param   uint16_t
+   *
+   * @return  void
+   */   
+  void SPI_WriteWord (uint16_t);
    
   /**
    * @desc    SPI Read Byte

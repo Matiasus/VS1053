@@ -55,6 +55,21 @@ void SPI_WriteByte (uint8_t data)
   SPI_SPDR = data;                // Start transmission
   while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete
 }
+
+/**
+ * @desc    SPI Write Word / big endian (MSB Byte first)
+ *
+ * @param   uint16_t
+ *
+ * @return  void
+ */   
+void SPI_WriteWord (uint16_t data)
+{
+  // High byte
+  SPI_WriteByte ((uint8_t)(data >> 8));
+  // Low byte
+  SPI_WriteByte ((uint8_t)(data & 0xFF));
+}
  
 /**
  * @desc    SPI Read Byte
