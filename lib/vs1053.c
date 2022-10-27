@@ -33,16 +33,17 @@
  */
 void VS1053_Init (void)
 {
+  SET_BIT (VS1053_DDR, VS1053_XDCS); 
+  CLR_BIT (VS1053_DDR, VS1053_DREQ);
+  SET_BIT (VS1053_DDR_RES, VS1053_XRST);
+
   // SET_BIT (VS1053_DDR, VS1053_MOSI);
   // SET_BIT (VS1053_DDR, VS1053_SCLK);
   // SET_BIT (VS1053_DDR, VS1053_XCS);
   // CLR_BIT (VS1053_DDR, VS1053_MISO)
-  SPI_MasterInit ();
+  SPI_PortInit ();  
+  SPI_SlowSpeedInit ();
 
-  SET_BIT (VS1053_DDR, VS1053_XDCS); 
-  CLR_BIT (VS1053_DDR, VS1053_DREQ);
-  SET_BIT (VS1053_DDR_RES, VS1053_XRST);
-  
   // init reset routine
   VS1053_Reset ();
 }
@@ -109,7 +110,8 @@ void VS1053_Reset (void)
 
   // soft reset
   VS1053_SoftReset();
-  //SPISetFastClock();  
+  // switch to fast speed 2 MHz
+  SPI_FastSpeedInit ();
 }
 
 /**
