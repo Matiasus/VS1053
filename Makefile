@@ -53,7 +53,7 @@ AVRSIZE       = avr-size
 SFLAGS        = --mcu=$(DEVICE) --format=avr
 #
 # Target and dependencies .c
-SOURCES      := $(wildcard *.c $(LIBDIR)/*.c)
+SOURCES      := $(wildcard *.c $(LIBDIR)/*.c $(LIBDIR)/*/*.c)
 #
 # Target and dependencies .o
 OBJECTS	      = $(SOURCES:.c=.o)
