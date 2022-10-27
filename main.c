@@ -41,17 +41,23 @@ int main (void)
   SSD1306_Init (addr);
   // clear screen
   SSD1306_ClearScreen ();
-  // draw line
-  SSD1306_DrawLine (0, MAX_X, 4, 4);
   // set position
-  SSD1306_SetPosition (7, 1);
+  SSD1306_SetPosition (0, 0);
   // draw string
-  SSD1306_DrawString ("VS1053 DRIVER TEST"); 
+  SSD1306_DrawString ("ssd1306 lcd init...");
+  // update
+  SSD1306_UpdateScreen (addr); 
 
   // MP3 ENCODER
   // -------------------------------------------------  
   // init VS1053
   VS1053_Init ();
+  // set position
+  SSD1306_SetPosition (0, 1);
+  // draw string
+  SSD1306_DrawString ("mp3 reset init..");
+  // update
+  SSD1306_UpdateScreen (addr);
 
   // EXIT
   // ------------------------------------------------- 
