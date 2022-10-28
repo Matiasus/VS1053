@@ -36,6 +36,7 @@ void SPI_PortInit (void)
   SET_BIT (SPI_DDR, SPI_SCK);      // as OUTPUT
   SET_BIT (SPI_DDR, SPI_MOSI);     // as OUTPUT
   CLR_BIT (SPI_DDR, SPI_MISO);     // as INTPUT
+  SET_BIT (SPI_PORT, SPI_MISO);    // pullup activate
 }
 
 /**
@@ -47,10 +48,13 @@ void SPI_PortInit (void)
  */
 void SPI_SlowSpeedInit (void)
 {
+  SPI_SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1) | (1<<SPR0);
+/*  
   SET_BIT (SPI_SPCR, SPE);         // SPE  - SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator,
   SET_BIT (SPI_SPCR, MSTR);        // MSTR - Master device
   SET_BIT (SPI_SPCR, SPR0);        // 
   SET_BIT (SPI_SPCR, SPR1);        // SPEED - Prescaler fclk/128 = 62500Hz
+*/
 }
 
 /**
@@ -62,11 +66,15 @@ void SPI_SlowSpeedInit (void)
  */
 void SPI_FastSpeedInit (void)
 {
+  SPI_SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1) | (1<<SPR0);
+  SPI_SPSR |= (1<<SPI2X);
+/*
   SET_BIT (SPI_SPCR, SPE);         // SPE  - SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator,
   SET_BIT (SPI_SPCR, MSTR);        // MSTR - Master device
   CLR_BIT (SPI_SPCR, SPR0);        // SPEED - fclk/4 = 2MHz
   CLR_BIT (SPI_SPCR, SPR1);        // 
-  CLR_BIT (SPI_SPSR, SPI2X);       // 
+  CLR_BIT (SPI_SPSR, SPI2X);       //
+*/
 }
 
 /**
