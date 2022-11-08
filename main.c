@@ -33,31 +33,26 @@
  */
 int main (void)
 {
-  uint8_t addr = SSD1306_ADDRESS;
-
   // LCD SSD1306
+  // *************************************************
+  SSD1306_Init (SSD1306_ADDRESS);
+
   // ------------------------------------------------- 
-  // init ssd1306
-  SSD1306_Init (addr);
   // clear screen
   SSD1306_ClearScreen ();
   // set position
   SSD1306_SetPosition (0, 0);
   // draw string
-  SSD1306_DrawString ("ssd1306 lcd init...");
+  SSD1306_DrawString ("1. lcd init");
   // update
-  SSD1306_UpdateScreen (addr); 
+  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
+  // ------------------------------------------------- 
 
   // MP3 ENCODER
-  // -------------------------------------------------  
-  // init VS1053
+  // *************************************************
   VS1053_Init ();
-  // set position
-  SSD1306_SetPosition (0, 1);
-  // draw string
-  SSD1306_DrawString ("mp3 reset init..");
-  // update
-  SSD1306_UpdateScreen (addr);
+
+  VS1053_TestSdi ();
 
   // EXIT
   // ------------------------------------------------- 

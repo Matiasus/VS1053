@@ -21,8 +21,25 @@
  * @sources     https://www.vlsi.fi/fileadmin/app_notes/vs10XXan_spi.pdf
  */
 
+#include "lcd/ssd1306.h"
 #include "spi.h"
 #include "vs1053.h"
+
+/**
+ * @desc    DREQ Wait
+ *
+ * @param   void
+ *
+ * @return  uint8_t
+ */
+inline uint8_t VS1053_DreqWait (void)
+{
+  while (1) {
+    if (IS_BIT_SET (VS1053_PORT, VS1053_DREQ)) {
+      return 0;
+    }
+  }
+}
 
 /**
  * @desc    Init
@@ -33,35 +50,45 @@
  */
 void VS1053_Init (void)
 {
+  // DATA SELECT as output
   SET_BIT (VS1053_DDR, VS1053_XDCS); 
+  // DATA REQUEST as input with pullup activate
   CLR_BIT (VS1053_DDR, VS1053_DREQ);
+  SET_BIT (VS1053_PORT, VS1053_DREQ);
+  // RESET as output
   SET_BIT (VS1053_DDR_RES, VS1053_XRST);
 
   // SET_BIT (VS1053_DDR, VS1053_MOSI);
   // SET_BIT (VS1053_DDR, VS1053_SCLK);
   // SET_BIT (VS1053_DDR, VS1053_XCS);
   // CLR_BIT (VS1053_DDR, VS1053_MISO)
-  SPI_PortInit ();  
+  SPI_PortInit ();
+  // f = fclk/128 = 62500Hz 
   SPI_SlowSpeedInit ();
+
+  // LCD SSD1306
+  // ------------------------------------------------- 
+  // set position
+  SSD1306_SetPosition (0, 1);
+  // draw string
+  SSD1306_DrawString ("2. SPI init");
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  // -------------------------------------------------  
 
   // init reset routine
   VS1053_Reset ();
-}
 
-/**
- * @desc    Set volume
- *
- * @param   uint8_t
- * @param   uint8_t
- *
- * @return  void
- */
-void VS1053_SetVolume (uint8_t left, uint8_t right)
-{
-  // set volume integer
-  uint16_t volume = (left << 8) | right; 
-  // send command
-  VS1053_WriteSci (SCI_VOL, volume);
+  // LCD SSD1306
+  // ------------------------------------------------- 
+  // set position
+  SSD1306_SetPosition (0, 2);
+  // draw string
+  SSD1306_DrawString ("3. reset init");
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  // -------------------------------------------------  
+
 }
 
 /**
@@ -80,7 +107,7 @@ void VS1053_Reset (void)
   _delay_ms (1);
   // Send dummy SPI byte to initialize SPI
   SPI_WriteByte (0xFF);
-  
+ 
   // Un-reset MP3 chip
   // Deactivate xCS
   SET_BIT (VS1053_PORT, VS1053_XCS);
@@ -90,11 +117,37 @@ void VS1053_Reset (void)
   SET_BIT (VS1053_PORT_RES, VS1053_XRST);
   // set volume - lowest level
   VS1053_SetVolume (0xff,0xff);
-  
-  // Set clock register 44100Hz, stereo
-  SPI_WriteWord (0xAC45);
+
+  uint8_t h;
+  uint8_t l;
+  uint16_t mode;
+  char str[20];
+
+  mode = VS1053_ReadSci (SCI_VOL);
+  l = (uint8_t) (mode >> 8);
+  h = (uint8_t) (mode & 0xff);
+  // set position
+  SSD1306_SetPosition (0, 3);
+  //
+  sprintf (str, "4. MODE:%d%d", h,l);
+  // draw string
+  SSD1306_DrawString (str);
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  // -------------------------------------------------
+
+/*
+
+  // 
+  // 8 4 2 1 | 8 4 2 1 | 8 4 2 1 | 8 4 2 1
+  // 1 0 0 1   1 1 0 0   1 1 0 0   1 1 0 0
+  // SC_MULT = 4 (XTALI x 3.5)
+  // SC_ADD  = 3 (XTALI x 2.0)
+  // SC_FREQ = 0x4CC = 1228
+  // XTALI = 1228 * 4000 + 8000000 = 1291200Hz
+  VS1053_WriteSci (SCI_CLOCKF, 0x9CCC);
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  VS1053_DreqWait ();
 
   // Slow sample rate for slow analog part startup 10 Hz
   VS1053_WriteSci (SCI_AUDATA, 0x000A);
@@ -110,8 +163,9 @@ void VS1053_Reset (void)
 
   // soft reset
   VS1053_SoftReset();
-  // switch to fast speed 2 MHz
+  // f = fclk/16 * 2 = 1MHz
   SPI_FastSpeedInit ();
+*/
 }
 
 /**
@@ -129,15 +183,15 @@ void VS1053_SoftReset (void)
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
-  
-  // Set clock register 44100Hz, stereo
+  VS1053_DreqWait ();
+
+  // 
   // 0x9ccc in source code
-  SPI_WriteWord (0xAC45);
+  VS1053_WriteSci (SCI_CLOCKF, 0x9CCC);
   // delay
   _delay_ms (1);
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  VS1053_DreqWait ();
 
   // Select data
   CLR_BIT (VS1053_PORT, VS1053_XDCS);
@@ -173,14 +227,14 @@ void VS1053_TestSdi (void)
     // Deactivate xCS
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // Wait until DREQ is high
-    WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+    VS1053_DreqWait ();
 
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
     // data in
     VS1053_WriteSdi (datain, 8);
     // Wait until DREQ is high
-    WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+    VS1053_DreqWait ();
     // Deactivate xCS
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // delay
@@ -191,7 +245,7 @@ void VS1053_TestSdi (void)
     // data out
     VS1053_WriteSdi (dataout, 4);
     // Wait until DREQ is high
-    WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+    VS1053_DreqWait ();
     // Deactivate xCS
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // delay
@@ -239,7 +293,8 @@ void VS1053_TestSci (void)
 void VS1053_WriteSci (uint8_t addr, uint16_t data)
 {
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  VS1053_DreqWait ();
+
   // Activate xCS
   CLR_BIT (VS1053_PORT, VS1053_XCS);
   // Write command code
@@ -252,6 +307,7 @@ void VS1053_WriteSci (uint8_t addr, uint16_t data)
   SPI_WriteByte ((uint8_t)(data & 0xFF));
   // Deactivate xCS
   SET_BIT (VS1053_PORT, VS1053_XCS);
+
 }
 
 /**
@@ -261,11 +317,11 @@ void VS1053_WriteSci (uint8_t addr, uint16_t data)
  *
  * @return  uint16_t
  */
-uint16_t VS1053_ReadSci (uint8_t addr) 
+uint16_t VS1053_ReadSci (uint8_t addr)
 {
   uint16_t data;
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  VS1053_DreqWait ();
   // Activate xCS
   CLR_BIT (VS1053_PORT, VS1053_XCS);
   // Read command code
@@ -299,7 +355,7 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
     return -1;
   }
   // Wait until DREQ is high
-  WAIT_IF_BIT_IS_SET (VS1053_PORT, VS1053_DREQ);
+  VS1053_DreqWait ();
   // Activate xDCS
   CLR_BIT (VS1053_PORT, VS1053_XDCS);
   // send data
@@ -310,4 +366,20 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
   SET_BIT (VS1053_PORT, VS1053_XDCS);
   // Success
   return 0;
+}
+
+/**
+ * @desc    Set volume
+ *
+ * @param   uint8_t
+ * @param   uint8_t
+ *
+ * @return  void
+ */
+void VS1053_SetVolume (uint8_t left, uint8_t right)
+{
+  // set volume integer
+  uint16_t volume = (left << 8) | right; 
+  // send command
+  VS1053_WriteSci (SCI_VOL, volume);
 }

@@ -37,16 +37,16 @@
     
     // SPI registers
     #define SPI_SPSR          SPSR
-    #define SPI_SPCR          SPSR
+    #define SPI_SPCR          SPCR
     #define SPI_SPDR          SPDR
     
   #endif
 
   // clear bit
-  #define CLR_BIT(port, bit)                ( ((port) &= ~(1 << (bit))) )
+  #define CLR_BIT(reg, bit)  ( ((reg) &= ~(1 << bit)) )
   // set bit
-  #define SET_BIT(port, bit)                ( ((port) |= (1 << (bit))) )
-  
+  #define SET_BIT(reg, bit)  ( ((reg) |= (1 << bit)) )
+
   /**
    * @desc    SPI Port Init
    *
