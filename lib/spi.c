@@ -36,6 +36,7 @@ void SPI_PortInit (void)
   SET_BIT (SPI_DDR, SPI_SCK);      // as OUTPUT
   SET_BIT (SPI_DDR, SPI_MOSI);     // as OUTPUT
   CLR_BIT (SPI_DDR, SPI_MISO);     // as INTPUT
+  SET_BIT (SPI_PORT, SPI_MISO);    // pullup activate
 }
 
 /**
