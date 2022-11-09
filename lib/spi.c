@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       21.10.2022
  * @file        spi.c
- * @update      23.10.2022
+ * @update      09.11.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -49,11 +49,12 @@ void SPI_PortInit (void)
 void SPI_SlowSpeedInit (void)
 {
   SPI_SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1) | (1<<SPR0);
-/*  
-  SET_BIT (SPI_SPCR, SPE);         // SPE  - SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator,
-  SET_BIT (SPI_SPCR, MSTR);        // MSTR - Master device
+/*
+  // NOTE: SPE must be set as last
+  SET_BIT (SPI_SPCR, MSTR);        // Master device
   SET_BIT (SPI_SPCR, SPR0);        // 
-  SET_BIT (SPI_SPCR, SPR1);        // SPEED - Prescaler fclk/128 = 62500Hz
+  SET_BIT (SPI_SPCR, SPR1);        // Prescaler fclk/128 = 62500Hz
+  SET_BIT (SPI_SPCR, SPE);         // SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator
 */
 }
 
@@ -66,14 +67,15 @@ void SPI_SlowSpeedInit (void)
  */
 void SPI_FastSpeedInit (void)
 {
-  SPI_SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1) | (1<<SPR0);
-  SPI_SPSR |= (1<<SPI2X);
+  SPI_SPSR = (1<<SPI2X);
+  SPI_SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
 /*
-  SET_BIT (SPI_SPCR, SPE);         // SPE  - SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator,
-  SET_BIT (SPI_SPCR, MSTR);        // MSTR - Master device
-  CLR_BIT (SPI_SPCR, SPR0);        // SPEED - fclk/4 = 2MHz
-  CLR_BIT (SPI_SPCR, SPR1);        // 
-  CLR_BIT (SPI_SPSR, SPI2X);       //
+  // NOTE: SPE must be set as last
+  SET_BIT (SPI_SPCR, MSTR);        // Master device
+  SET_BIT (SPI_SPCR, SPR0);        // 
+  CLR_BIT (SPI_SPCR, SPR1);        // f = fclk/16 = 0.5MHz
+  SET_BIT (SPI_SPSR, SPI2X);       // f * 2 = 1MHz
+  SET_BIT (SPI_SPCR, SPE);         // SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator
 */
 }
 
@@ -86,8 +88,11 @@ void SPI_FastSpeedInit (void)
  */   
 void SPI_WriteByte (uint8_t data)
 {
-  SPI_SPDR = data;                // Start transmission
-  while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete
+  // start transmission
+  SPI_SPDR = data;
+  // wait for transmission complete
+  while(!(SPI_SPSR & (1<<SPIF)))
+  ;
 }
 
 /**
@@ -99,9 +104,9 @@ void SPI_WriteByte (uint8_t data)
  */   
 void SPI_WriteWord (uint16_t data)
 {
-  // High byte
+  // high byte
   SPI_WriteByte ((uint8_t)(data >> 8));
-  // Low byte
+  // low byte
   SPI_WriteByte ((uint8_t)(data & 0xFF));
 }
  
@@ -114,10 +119,13 @@ void SPI_WriteWord (uint16_t data)
  */   
  uint8_t SPI_ReadByte (void)
  {
-  SPI_SPDR = 0xFF;                // Start transmission, fill dummy byte
-  while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete
-
-  return SPI_SPDR;                // Read received data
+  // start transmission, dummy byte
+  SPI_SPDR = 0xFF;
+  // wait for transmission complete
+  while(!(SPI_SPSR & (1<<SPIF)))
+  ;
+  // return received data
+  return SPI_SPDR;
  }
  
 /**
@@ -129,8 +137,11 @@ void SPI_WriteWord (uint16_t data)
  */   
  uint8_t SPI_WriteReadByte (uint8_t data)
  {
-  SPI_SPDR = data;                // Start transmission
-  while(!(SPI_SPSR & (1<<SPIF))); // Wait for transmission complete          
-  
-  return SPI_SPDR;                // Read received data
+  // start transmission
+  SPI_SPDR = data;
+  // wait for transmission complete
+  while(!(SPI_SPSR & (1<<SPIF)))
+  ;
+  // return received data
+  return SPI_SPDR;
  }

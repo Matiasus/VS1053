@@ -99,12 +99,21 @@
   #define VS1053_WRITE        0x2
   
   // FUNCTION macros
-  // bit is clear?
-  #define IS_BIT_CLR(port, bit)             ( IS_BIT_SET(port, bit) ? 0 : 1 )
   // bit is set?
   #define IS_BIT_SET(port, bit)             ( ((port) & (1 << (bit))) ? 1 : 0 )
+  // bit is clear?
+  #define IS_BIT_CLR(port, bit)             ( IS_BIT_SET(port, bit) ? 0 : 1 )
   // wait until bit is set
   #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }
+
+  /**
+   * @desc    DREQ Wait
+   *
+   * @param   void
+   *
+   * @return  uint8_t
+   */
+  uint8_t VS1053_DreqWait (void);
 
   /**
    * @desc    Hard reset
