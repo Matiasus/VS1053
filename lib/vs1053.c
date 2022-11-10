@@ -208,6 +208,7 @@ void VS1053_SoftReset (void)
 
 /**
  * @desc    Test SDI - sine test
+ * @src     https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c-source.html
  *
  * @param   void
  *
@@ -215,9 +216,59 @@ void VS1053_SoftReset (void)
  */  
 void VS1053_TestSdi (void) 
 {
-  uint8_t datain[] = {0x53, 0xEF, 0x6E, 0x30, 0, 0, 0, 0};
-  uint8_t dataout[] = {0x45, 0x78, 0x69, 0x74};  
+  // sine wave
+/*
+  uint8_t datain[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
+  uint8_t dataout[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
+*/
+  CLR_BIT (VS1053_PORT_RES, VS1053_XRST);   // Activate XRST
+  _delay_ms (100);                          // delay 100ms
+  SPI_WriteByte (0xFF);                     // Send dummy SPI byte to initialize SPI
+ 
+  // Un-reset MP3 chip
+  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
+  SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
+  SET_BIT (VS1053_PORT_RES, VS1053_XRST);   // Deactivate XRST
+  _delay_ms (100);                          // delay 100ms
+
+  // Sine test command / VS10xx Application Notes, chapter 4.8
+  CLR_BIT (VS1053_PORT, VS1053_XCS);        // Activate xCS
+  SPI_WriteByte (VS1053_WRITE);             // Write command code
+  SPI_WriteByte (SCI_MODE);                 // SCI MODE register
+  SPI_WriteByte (0x08);                     // High byte
+  SPI_WriteByte (0x20);                     // Low byte
+  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
+  VS1053_DreqWait ();                       // Wait until DREQ is high
   
+  // Send a Sine Test Header to Data port
+  CLR_BIT (VS1053_PORT, VS1053_XDCS);       // Activate xDCS 
+  SPI_WriteByte (0x53);                     // Write sine sound
+  SPI_WriteByte (0xef);                     // 
+  SPI_WriteByte (0x6e);                     // 
+  SPI_WriteByte (0x44);                     //
+  SPI_WriteByte (0x00);                     //
+  SPI_WriteByte (0x00);                     // 
+  SPI_WriteByte (0x00);                     // 
+  SPI_WriteByte (0x00);                     //
+//  SPI_ReadByte ();                        // ???  
+  SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
+  _delay_ms (500);                          // delay 500ms
+  
+  // Stop a Sine Test
+  CLR_BIT (VS1053_PORT, VS1053_XDCS);       // Activate xDCS 
+  SPI_WriteByte (0x45);                     // Write sine sound
+  SPI_WriteByte (0x78);                     // 
+  SPI_WriteByte (0x69);                     // 
+  SPI_WriteByte (0x74);                     //
+  SPI_WriteByte (0x00);                     //
+  SPI_WriteByte (0x00);                     // 
+  SPI_WriteByte (0x00);                     // 
+  SPI_WriteByte (0x00);                     //
+//  SPI_ReadByte ();                        // ???  
+  SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
+  _delay_ms (500);                          // delay 500ms
+  
+  /*
   while (1)
   {
     // Activate xCS
@@ -250,7 +301,8 @@ void VS1053_TestSdi (void)
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // delay
     _delay_ms (500);
-  }  
+  }
+  */
 }
 
 /**
@@ -266,7 +318,7 @@ void VS1053_TestSci (void)
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
     // Set full volume
-    VS1053_WriteSci (0x0B, 0x0000);
+    VS1053_WriteSci (SCI_VOL, 0x0000);
     // Deactivate xCS               
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // delay
@@ -274,7 +326,7 @@ void VS1053_TestSci (void)
     // Activate xCS           
     CLR_BIT (VS1053_PORT, VS1053_XCS);
     // Set full volume
-    VS1053_WriteSci (0x0B, 0xFFFF);
+    VS1053_WriteSci (SCI_VOL, 0xFFFF);
     // Deactivate xCS           
     SET_BIT (VS1053_PORT, VS1053_XCS);
     // delay
