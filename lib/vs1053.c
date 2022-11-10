@@ -32,7 +32,7 @@
  *
  * @return  uint8_t
  */
-inline uint8_t VS1053_DreqWait (void)
+inline static uint8_t VS1053_DreqWait (void)
 {
   while (1) {
     if (IS_BIT_SET (VS1053_PORT, VS1053_DREQ)) {
@@ -50,45 +50,15 @@ inline uint8_t VS1053_DreqWait (void)
  */
 void VS1053_Init (void)
 {
-  // DATA SELECT as output
-  SET_BIT (VS1053_DDR, VS1053_XDCS); 
-  // DATA REQUEST as input with pullup activate
-  CLR_BIT (VS1053_DDR, VS1053_DREQ);
-  SET_BIT (VS1053_PORT, VS1053_DREQ);
-  // RESET as output
-  SET_BIT (VS1053_DDR_RES, VS1053_XRST);
+  SET_BIT (VS1053_DDR, VS1053_XDCS);        // DATA SELECT as output
+  CLR_BIT (VS1053_DDR, VS1053_DREQ);        // DATA REQUEST as input
+  SET_BIT (VS1053_PORT, VS1053_DREQ);       // DATA REQUEST pullup activate
+  SET_BIT (VS1053_DDR_RES, VS1053_XRST);    // RESET as output
 
-  // SET_BIT (VS1053_DDR, VS1053_MOSI);
-  // SET_BIT (VS1053_DDR, VS1053_SCLK);
-  // SET_BIT (VS1053_DDR, VS1053_XCS);
-  // CLR_BIT (VS1053_DDR, VS1053_MISO)
-  SPI_PortInit ();
-  // f = fclk/128 = 62500Hz 
-  SPI_SlowSpeedInit ();
+  SPI_PortInit ();                          // output={MOSI;SCLK;CS} input={MISO}
+  SPI_SlowSpeedInit ();                     // f = fclk/128 = 62500Hz
 
-  // LCD SSD1306
-  // ------------------------------------------------- 
-  // set position
-  SSD1306_SetPosition (0, 1);
-  // draw string
-  SSD1306_DrawString ("2. SPI init");
-  // update
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
-  // -------------------------------------------------  
-
-  // init reset routine
-  VS1053_Reset ();
-
-  // LCD SSD1306
-  // ------------------------------------------------- 
-  // set position
-  SSD1306_SetPosition (0, 2);
-  // draw string
-  SSD1306_DrawString ("3. reset init");
-  // update
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
-  // -------------------------------------------------  
-
+  VS1053_Reset ();                          // init reset routine
 }
 
 /**
@@ -103,8 +73,9 @@ void VS1053_Reset (void)
 {
   // Activate XRST
   CLR_BIT (VS1053_PORT_RES, VS1053_XRST);
-  // delay
-  _delay_ms (1);
+  // After a hardware reset (or at power-up) DREQ will stay down for around 22000 clock cycles,
+  // which means an approximate 1.8 ms delay if VS1053b is run at 12.288 MHz
+  _delay_ms (2);
   // Send dummy SPI byte to initialize SPI
   SPI_WriteByte (0xFF);
  
@@ -117,26 +88,6 @@ void VS1053_Reset (void)
   SET_BIT (VS1053_PORT_RES, VS1053_XRST);
   // set volume - lowest level
   VS1053_SetVolume (0xff,0xff);
-
-  uint8_t h;
-  uint8_t l;
-  uint16_t mode;
-  char str[20];
-
-  mode = VS1053_ReadSci (SCI_VOL);
-  l = (uint8_t) (mode >> 8);
-  h = (uint8_t) (mode & 0xff);
-  // set position
-  SSD1306_SetPosition (0, 3);
-  //
-  sprintf (str, "4. MODE:%d%d", h,l);
-  // draw string
-  SSD1306_DrawString (str);
-  // update
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
-  // -------------------------------------------------
-
-/*
 
   // 
   // 8 4 2 1 | 8 4 2 1 | 8 4 2 1 | 8 4 2 1
@@ -159,13 +110,12 @@ void VS1053_Reset (void)
   // 8kHz, mono
   VS1053_WriteSci (SCI_AUDATA, 0x1F41);
   // Set volume level
-  VS1053_SetVolume (0x14,0x14);
+  VS1053_SetVolume (0x66,0x66);
 
   // soft reset
   VS1053_SoftReset();
   // f = fclk/16 * 2 = 1MHz
   SPI_FastSpeedInit ();
-*/
 }
 
 /**
@@ -214,13 +164,13 @@ void VS1053_SoftReset (void)
  *
  * @return  void
  */  
-void VS1053_TestSdi (void) 
+void VS1053_SineTest (void) 
 {
   // sine wave
+
+  uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
+  uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 /*
-  uint8_t datain[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
-  uint8_t dataout[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
-*/
   CLR_BIT (VS1053_PORT_RES, VS1053_XRST);   // Activate XRST
   _delay_ms (100);                          // delay 100ms
   SPI_WriteByte (0xFF);                     // Send dummy SPI byte to initialize SPI
@@ -239,6 +189,15 @@ void VS1053_TestSdi (void)
   SPI_WriteByte (0x20);                     // Low byte
   SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
   VS1053_DreqWait ();                       // Wait until DREQ is high
+
+  // ------------------------------------------------- 
+  // set position
+  SSD1306_SetPosition (0, 3);
+  // draw string
+  SSD1306_DrawString ("4. sine test start");
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
+  // -------------------------------------------------
   
   // Send a Sine Test Header to Data port
   CLR_BIT (VS1053_PORT, VS1053_XDCS);       // Activate xDCS 
@@ -267,8 +226,7 @@ void VS1053_TestSdi (void)
 //  SPI_ReadByte ();                        // ???  
   SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
   _delay_ms (500);                          // delay 500ms
-  
-  /*
+*/
   while (1)
   {
     // Activate xCS
@@ -283,7 +241,7 @@ void VS1053_TestSdi (void)
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
     // data in
-    VS1053_WriteSdi (datain, 8);
+    VS1053_WriteSdi (sine_activate, 8);
     // Wait until DREQ is high
     VS1053_DreqWait ();
     // Deactivate xCS
@@ -294,7 +252,7 @@ void VS1053_TestSdi (void)
     // Activate xCS
     CLR_BIT (VS1053_PORT, VS1053_XCS);
     // data out
-    VS1053_WriteSdi (dataout, 4);
+    VS1053_WriteSdi (sine_deactivate, 8);
     // Wait until DREQ is high
     VS1053_DreqWait ();
     // Deactivate xCS
@@ -302,7 +260,6 @@ void VS1053_TestSdi (void)
     // delay
     _delay_ms (500);
   }
-  */
 }
 
 /**

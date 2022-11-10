@@ -142,7 +142,7 @@
    *
    * @return  void
    */  
-  void VS1053_TestSdi (void);
+  void VS1053_SineTest (void);
 
   /**
    * @desc    Test SCI
