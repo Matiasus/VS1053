@@ -86,7 +86,7 @@ void VS1053_Reset (void)
   SET_BIT (VS1053_PORT, VS1053_XDCS);
   // Deactivate XRST
   SET_BIT (VS1053_PORT_RES, VS1053_XRST);
-  // set volume - lowest level
+  // activate analog powerdown mode
   VS1053_SetVolume (0xff,0xff);
 
   // 
@@ -151,7 +151,7 @@ void VS1053_SoftReset (void)
   SPI_WriteByte (0);
   SPI_WriteByte (0);
   // wait for SPI ready to send
-  SPI_ReadByte ();  
+  //SPI_ReadByte ();  
   // DESelect data
   SET_BIT (VS1053_PORT, VS1053_XDCS);  
 }
