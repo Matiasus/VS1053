@@ -32,7 +32,7 @@
  *
  * @return  uint8_t
  */
-inline static uint8_t VS1053_DreqWait (void)
+static inline uint8_t VS1053_DreqWait (void)
 {
   while (1) {
     if (IS_BIT_SET (VS1053_PORT, VS1053_DREQ)) {
@@ -167,6 +167,14 @@ void VS1053_SoftReset (void)
 void VS1053_SineTest (void) 
 {
   // sine wave
+  // ------------------------------------------------- 
+  // set position
+  SSD1306_SetPosition (0, 2);
+  // draw string
+  SSD1306_DrawString ("3. sine test start");
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
+  // -------------------------------------------------
 
   uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};

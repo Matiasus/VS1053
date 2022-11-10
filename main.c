@@ -52,6 +52,14 @@ int main (void)
   // *************************************************
   // init mp3 decoder
   VS1053_Init ();
+  // ------------------------------------------------- 
+  // set position
+  SSD1306_SetPosition (0, 1);
+  // draw string
+  SSD1306_DrawString ("2. mp3 init");
+  // update
+  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
+  // -------------------------------------------------
   // sine test
   VS1053_SineTest ();
 

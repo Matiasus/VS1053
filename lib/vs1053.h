@@ -113,7 +113,7 @@
    *
    * @return  uint8_t
    */
-  uint8_t VS1053_DreqWait (void);
+  //static inline uint8_t VS1053_DreqWait (void);
 
   /**
    * @desc    Hard reset
