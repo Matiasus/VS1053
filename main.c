@@ -34,36 +34,31 @@
 int main (void)
 {
   // LCD SSD1306
-  // *************************************************
-  // init lcd
   SSD1306_Init (SSD1306_ADDRESS);
-  // ------------------------------------------------- 
-  // clear screen
+
+  // Print to lcd 
   SSD1306_ClearScreen ();
-  // set position
   SSD1306_SetPosition (0, 0);
-  // draw string
   SSD1306_DrawString ("1. lcd init");
-  // update
   SSD1306_UpdateScreen (SSD1306_ADDRESS); 
-  // ------------------------------------------------- 
 
   // MP3 ENCODER
-  // *************************************************
-  // init mp3 decoder
   VS1053_Init ();
-  // ------------------------------------------------- 
-  // set position
+
+  // Print to lcd
   SSD1306_SetPosition (0, 1);
-  // draw string
   SSD1306_DrawString ("2. mp3 init");
-  // update
-  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
-  // -------------------------------------------------
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  
   // sine test
   VS1053_SineTest ();
 
+  // Print to lcd
+  SSD1306_SetPosition (0, 2);
+  SSD1306_DrawString ("3. mp3 sine test");
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+
   // EXIT
-  // ************************************************* 
+  // -------------------------------------------------
   return 0;
 }
