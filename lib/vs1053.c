@@ -12,7 +12,7 @@
  * @version     1.0
  * @tested      AVR Atmega328p
  *
- * @depend      spi.h, vs1053.h
+ * @depend      vs1053.h
  * --------------------------------------------------------------------------------------+
  * @interface   SPI connected through 7 pins
  * @pins        5V, DGND, MOSI, DREQ,  XCS
@@ -45,25 +45,94 @@ static inline uint8_t VS1053_DreqWait (void)
 }
 
 /**
- * @desc    Init
+ * @desc    Write Serial Command Instruction / big endian /
+ *
+ * @param   uint8_t addr
+ * @param   uint16_t command
+ *
+ * @return  void
+ */
+void VS1053_WriteSci (uint8_t addr, uint16_t cmnd)
+{
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+  CLR_BIT (VS1053_PORT, VS1053_XCS);        // Activate xCS
+  SPI_WriteByte (VS1053_WRITE);             // Command code for WRITE
+  SPI_WriteByte (addr);                     // SCI register number
+  SPI_WriteByte ((uint8_t)(cmnd >> 8));     // High byte
+  SPI_WriteByte ((uint8_t)(cmnd & 0xFF));   // Low byte
+  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
+}
+
+/**
+ * @desc    Read Serial Command Instruction / big endian /
+ *
+ * @param   uint8_t addr
+ *
+ * @return  uint16_t
+ */
+uint16_t VS1053_ReadSci (uint8_t addr)
+{
+  uint16_t data;
+
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+  CLR_BIT (VS1053_PORT, VS1053_XCS);        // Activate xCS
+  SPI_WriteByte (VS1053_READ);              // Command code for READ
+  SPI_WriteByte (addr);                     // SCI register number
+  data = (uint16_t)SPI_ReadByte() << 8;     // High byte
+  data |= SPI_ReadByte();                   // Low byte
+  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
+
+  return data;                              // Return content
+}
+
+/**
+ * @desc    Test SCI
  *
  * @param   void
  *
  * @return  void
  */
-void VS1053_Init (void)
+void VS1053_TestSci (void)
 {
-  SET_BIT (VS1053_DDR, VS1053_XDCS);        // DATA SELECT as output
-  CLR_BIT (VS1053_DDR, VS1053_DREQ);        // DATA REQUEST as input
-  SET_BIT (VS1053_PORT, VS1053_DREQ);       // DATA REQUEST pullup activate
-  SET_BIT (VS1053_DDR_RES, VS1053_XRST);    // RESET as output
+  while (1)
+  {
+    CLR_BIT (VS1053_PORT, VS1053_XCS);      // Activate xCS
+    VS1053_WriteSci (SCI_VOL, 0x0000);      // Set full volume
+    SET_BIT (VS1053_PORT, VS1053_XCS);      // Deactivate xCS
+    _delay_ms (500);                        // delay
 
-  SPI_PortInit ();                          // output={MOSI;SCLK;CS} input={MISO}
-  SPI_SlowSpeedInit ();                     // f = fclk/128 = 62500Hz
-
-  VS1053_Reset ();                          // init reset routine
+    CLR_BIT (VS1053_PORT, VS1053_XCS);      // Activate xCS
+    VS1053_WriteSci (SCI_VOL, 0xFFFF);      // Set full volume
+    SET_BIT (VS1053_PORT, VS1053_XCS);      // Deactivate xCS
+    _delay_ms (500);                        // delay
+  }
 }
 
+/**
+ * @desc    Write Serial Data
+ *
+ * @param   uint8_t * data
+ * @param   uint8_t bytes
+ *
+ * @return  int
+ */
+int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
+{
+  uint8_t i;
+
+  if (bytes > 32) {                         // Error: Too many bytes to transfer!
+    return -1;
+  }
+
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+  CLR_BIT (VS1053_PORT, VS1053_XDCS);       // Activate xDCS
+  for (i = 0; i < bytes; i++) {             // Send data
+    SPI_WriteByte (*data++);                 //
+  }                                         //
+  SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
+
+  return 0;                                 // Success
+}
 /**
  * @desc    Hard reset
  * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
@@ -134,6 +203,40 @@ void VS1053_SoftReset (void)
 }
 
 /**
+ * @desc    Init
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_Init (void)
+{
+  SET_BIT (VS1053_DDR, VS1053_XDCS);        // DATA SELECT as output
+  CLR_BIT (VS1053_DDR, VS1053_DREQ);        // DATA REQUEST as input
+  SET_BIT (VS1053_PORT, VS1053_DREQ);       // DATA REQUEST pullup activate
+  SET_BIT (VS1053_DDR_RES, VS1053_XRST);    // RESET as output
+
+  SPI_PortInit ();                          // output={MOSI;SCLK;CS} input={MISO}
+  SPI_SlowSpeedInit ();                     // f = fclk/128 = 62500Hz
+
+  VS1053_Reset ();                          // init reset routine
+}
+
+/**
+ * @desc    Set volume
+ *
+ * @param   uint8_t
+ * @param   uint8_t
+ *
+ * @return  void
+ */
+void VS1053_SetVolume (uint8_t left, uint8_t right)
+{
+  uint16_t volume = (left << 8) | right;    // set volume integer
+  VS1053_WriteSci (SCI_VOL, volume);        // send command
+}
+
+/**
  * @desc    Test SDI - sine test
  * @src     https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c-source.html
  *
@@ -177,108 +280,4 @@ void VS1053_SineTest (void)
   VS1053_DreqWait ();                       // Wait until DREQ is high
   SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
   _delay_ms (500);                          // delay
-}
-
-/**
- * @desc    Test SCI
- *
- * @param   void
- *
- * @return  void
- */
-void VS1053_TestSci (void)
-{
-  while (1)
-  {
-    CLR_BIT (VS1053_PORT, VS1053_XCS);      // Activate xCS
-    VS1053_WriteSci (SCI_VOL, 0x0000);      // Set full volume
-    SET_BIT (VS1053_PORT, VS1053_XCS);      // Deactivate xCS
-    _delay_ms (500);                        // delay
-
-    CLR_BIT (VS1053_PORT, VS1053_XCS);      // Activate xCS
-    VS1053_WriteSci (SCI_VOL, 0xFFFF);      // Set full volume
-    SET_BIT (VS1053_PORT, VS1053_XCS);      // Deactivate xCS
-    _delay_ms (500);                        // delay
-  }
-}
-
-/**
- * @desc    Write Serial Command Instruction / big endian /
- *
- * @param   uint8_t addr
- * @param   uint16_t command
- *
- * @return  void
- */
-void VS1053_WriteSci (uint8_t addr, uint16_t cmnd)
-{
-  VS1053_DreqWait ();                       // Wait until DREQ is high
-  CLR_BIT (VS1053_PORT, VS1053_XCS);        // Activate xCS
-  SPI_WriteByte (VS1053_WRITE);             // Command code for WRITE
-  SPI_WriteByte (addr);                     // SCI register number
-  SPI_WriteByte ((uint8_t)(cmnd >> 8));     // High byte
-  SPI_WriteByte ((uint8_t)(cmnd & 0xFF));   // Low byte
-  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
-}
-
-/**
- * @desc    Read Serial Command Instruction / big endian /
- *
- * @param   uint8_t addr
- *
- * @return  uint16_t
- */
-uint16_t VS1053_ReadSci (uint8_t addr)
-{
-  uint16_t data;
-
-  VS1053_DreqWait ();                       // Wait until DREQ is high
-  CLR_BIT (VS1053_PORT, VS1053_XCS);        // Activate xCS
-  SPI_WriteByte (VS1053_READ);              // Command code for READ
-  SPI_WriteByte (addr);                     // SCI register number
-  data = (uint16_t)SPI_ReadByte() << 8;     // High byte
-  data |= SPI_ReadByte();                   // Low byte
-  SET_BIT (VS1053_PORT, VS1053_XCS);        // Deactivate xCS
-
-  return data;                              // Return content
-}
-
-/**
- * @desc    Write Serial Data
- *
- * @param   uint8_t * data
- * @param   uint8_t bytes
- *
- * @return  int
- */
-int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
-{
-  uint8_t i;
-
-  if (bytes > 32) {                         // Error: Too many bytes to transfer!
-    return -1;
-  }
-
-  VS1053_DreqWait ();                       // Wait until DREQ is high
-  CLR_BIT (VS1053_PORT, VS1053_XDCS);       // Activate xDCS
-  for (i = 0; i < bytes; i++) {             // Send data
-    SPI_WriteByte (*data++);                 //
-  }                                         //
-  SET_BIT (VS1053_PORT, VS1053_XDCS);       // Deactivate xDCS
-
-  return 0;                                 // Success
-}
-
-/**
- * @desc    Set volume
- *
- * @param   uint8_t
- * @param   uint8_t
- *
- * @return  void
- */
-void VS1053_SetVolume (uint8_t left, uint8_t right)
-{
-  uint16_t volume = (left << 8) | right;    // set volume integer
-  VS1053_WriteSci (SCI_VOL, volume);        // send command
 }
