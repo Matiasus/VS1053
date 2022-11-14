@@ -26,7 +26,6 @@
  */
 
 #include "lcd/ssd1306.h"
-#include "spi.h"
 #include "vs1053.h"
 
 /**
