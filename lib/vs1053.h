@@ -28,6 +28,7 @@
 #ifndef __VS1053_H__
 #define __VS1053_H__
 
+  // INCLUDE libraries
   #include <avr/io.h>
   #include <util/delay.h>
   #include "spi.h"
@@ -102,13 +103,8 @@
   #define VS1053_READ         0x3
   #define VS1053_WRITE        0x2
 
-  // FUNCTION macros
-  // bit is set?
-  #define IS_BIT_SET(port, bit)             ( ((port) & (1 << (bit))) ? 1 : 0 )
-  // bit is clear?
-  #define IS_BIT_CLR(port, bit)             ( IS_BIT_SET(port, bit) ? 0 : 1 )
-  // wait until bit is set
-  #define WAIT_IF_BIT_IS_SET(port, bit)     { while (IS_BIT_CLR(port, bit)); }
+  // Version
+  #define VS1053_VERS_MASK    0xF0
 
   /**
    * @desc    Write Serial Command Instruction
@@ -194,6 +190,15 @@
    *
    * @return  void
    */
-  void VS1053_SineTest (void);  
+  void VS1053_SineTest (void);
+
+  /**
+   * @desc    Get Version
+   *
+   * @param   void
+   *
+   * @return  char *
+   */
+  char * VS1053_GetVersion (void);
 
 #endif

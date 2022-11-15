@@ -20,7 +20,7 @@
  * @sources
  */
 
-/* INCLUDE libraries */
+// INCLUDE libraries
 #include "spi.h"
 
 /**

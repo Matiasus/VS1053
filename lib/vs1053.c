@@ -25,8 +25,47 @@
  *              https://os.mbed.com/users/silis/code/VS1053//file/5ad25d480d5f/VS1053.cpp/
  */
 
-#include "lcd/ssd1306.h"
+// INCLUDE libraries
+#include <avr/pgmspace.h>
 #include "vs1053.h"
+
+
+const char vers_0[] PROGMEM = "VS1001"; 
+const char vers_1[] PROGMEM = "VS1011"; 
+const char vers_2[] PROGMEM = "VS1002"; 
+const char vers_3[] PROGMEM = "VS1003"; 
+const char vers_4[] PROGMEM = "VS1053"; 
+const char vers_5[] PROGMEM = "VS1033"; 
+const char vers_6[] PROGMEM = "VS1063"; 
+const char vers_7[] PROGMEM = "VS1103";
+
+const char * const versPointers[] PROGMEM = {
+  vers_0, vers_1,
+  vers_2, vers_3,
+  vers_4, vers_5,
+  vers_6, vers_7,
+};
+
+/**
+ * @desc    Get Version
+ *
+ * @param   void
+ *
+ * @return  const char *
+ */
+char * VS1053_GetVersion (void)
+{
+  uint8_t version;
+  static char buffer[6];
+
+  version = (uint8_t) VS1053_ReadSci (SCI_STATUS);
+  version &= VS1053_VERS_MASK >> 4;
+
+  char * ptr = (char *) pgm_read_word (&versPointers[version]);
+  strcpy_P (buffer, ptr);
+
+  return buffer;
+}
 
 /**
  * @desc    Activate Command / clear XCS
@@ -35,7 +74,7 @@
  *
  * @return  void
  */
-static inline uint8_t VS1053_ActivateCommand (void) { VS1053_PORT &= ~(1 << VS1053_XCS); }
+static inline void VS1053_ActivateCommand (void) { VS1053_PORT &= ~(1 << VS1053_XCS); }
 
 /**
  * @desc    Deactivate Command / set XCS
@@ -44,7 +83,7 @@ static inline uint8_t VS1053_ActivateCommand (void) { VS1053_PORT &= ~(1 << VS10
  *
  * @return  void
  */
-static inline uint8_t VS1053_DeactivateCommand (void) { VS1053_PORT |= (1 << VS1053_XCS); }
+static inline void VS1053_DeactivateCommand (void) { VS1053_PORT |= (1 << VS1053_XCS); }
 
 /**
  * @desc    Activate Data / clear XDCS
@@ -53,7 +92,7 @@ static inline uint8_t VS1053_DeactivateCommand (void) { VS1053_PORT |= (1 << VS1
  *
  * @return  void
  */
-static inline uint8_t VS1053_ActivateData (void) { VS1053_PORT &= ~(1 << VS1053_XDCS); }
+static inline void VS1053_ActivateData (void) { VS1053_PORT &= ~(1 << VS1053_XDCS); }
 
 /**
  * @desc    Deactivate Data / set XDCS
@@ -62,7 +101,7 @@ static inline uint8_t VS1053_ActivateData (void) { VS1053_PORT &= ~(1 << VS1053_
  *
  * @return  void
  */
-static inline uint8_t VS1053_DeactivateData (void) { VS1053_PORT |= (1 << VS1053_XDCS); }
+static inline void VS1053_DeactivateData (void) { VS1053_PORT |= (1 << VS1053_XDCS); }
 
 /**
  * @desc    Activate RESET / clear XRST
@@ -71,7 +110,7 @@ static inline uint8_t VS1053_DeactivateData (void) { VS1053_PORT |= (1 << VS1053
  *
  * @return  void
  */
-static inline uint8_t VS1053_ActivateReset (void) { VS1053_PORT_RES &= ~(1 << VS1053_XRST); }
+static inline void VS1053_ActivateReset (void) { VS1053_PORT_RES &= ~(1 << VS1053_XRST); }
 
 /**
  * @desc    Deactivate RESET / set XRST
@@ -80,7 +119,7 @@ static inline uint8_t VS1053_ActivateReset (void) { VS1053_PORT_RES &= ~(1 << VS
  *
  * @return  void
  */
-static inline uint8_t VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS1053_XRST); }
+static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS1053_XRST); }
 
 /**
  * @desc    DREQ Wait
@@ -342,12 +381,12 @@ void VS1053_SineTest (void)
   VS1053_WriteSdi (sine_activate, 8);       // Sine wave data activate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (500);                          // delay
+  _delay_ms (2000);                         // delay
 
   // sine wave sequence stop
   VS1053_ActivateCommand ();                // clear xCS
   VS1053_WriteSdi (sine_deactivate, 8);     // Sine wave data deactivate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (500);                          // delay
+  _delay_ms (100);                          // delay
 }

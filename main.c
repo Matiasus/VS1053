@@ -21,6 +21,7 @@
  * @sources     https://www.vlsi.fi/fileadmin/app_notes/vs10XXan_spi.pdf
  */
 
+// INCLUDE libraries
 #include "lib/vs1053.h"
 #include "lib/lcd/ssd1306.h"
 
@@ -33,29 +34,52 @@
  */
 int main (void)
 {
+  char * version;
+
   // LCD SSD1306
+  // ---------------------------------------
   SSD1306_Init (SSD1306_ADDRESS);
 
-  // Print to lcd 
+  // print header info 
   SSD1306_ClearScreen ();
-  SSD1306_SetPosition (0, 0);
-  SSD1306_DrawString ("1. lcd init");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS); 
+  SSD1306_DrawLine (0, MAX_X, 4, 4);
+  SSD1306_SetPosition (10, 1);
+  SSD1306_DrawString ("VS1053 MP3 DECODER");
+  SSD1306_DrawLine (0, MAX_X, 18, 18);
+
+  // print mp3 init
+  SSD1306_SetPosition (2, 3);
+  SSD1306_DrawString ("MP3 init");
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
 
   // MP3 ENCODER
+  // ---------------------------------------
   VS1053_Init ();
 
+  // print mp3 init success
+  SSD1306_SetPosition (103, 3);
+  SSD1306_DrawString ("[OK]");
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+
   // Print to lcd
-  SSD1306_SetPosition (0, 1);
-  SSD1306_DrawString ("2. mp3 init");
+  SSD1306_SetPosition (2, 4);
+  SSD1306_DrawString ("MP3 sine test");
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
   
   // sine test
   VS1053_SineTest ();
 
-  // Print to lcd
-  SSD1306_SetPosition (0, 2);
-  SSD1306_DrawString ("3. mp3 sine test");
+  // print sine test success
+  SSD1306_SetPosition (103, 4);
+  SSD1306_DrawString ("[OK]");
+  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+
+  // read sci register
+  // ---------------------------------------
+  SSD1306_SetPosition (2, 5);
+  version = VS1053_GetVersion ();
+  SSD1306_DrawString ("MP3 Version: ");
+  SSD1306_DrawString (version);
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
 
   // EXIT
