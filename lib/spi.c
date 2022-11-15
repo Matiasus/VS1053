@@ -37,13 +37,6 @@ void SPI_PortInit (void)
              (1 << SPI_MOSI);               //
   SPI_DDR &= ~(1 << SPI_MISO);              // inputs
   SPI_PORT |= (1 << SPI_MISO);              // pullup activate
-/*
-  SET_BIT (SPI_DDR, SPI_SS);                // as OUTPUT
-  SET_BIT (SPI_DDR, SPI_SCK);               // as OUTPUT
-  SET_BIT (SPI_DDR, SPI_MOSI);              // as OUTPUT
-  CLR_BIT (SPI_DDR, SPI_MISO);              // as INTPUT
-  SET_BIT (SPI_PORT, SPI_MISO);             // pullup activate
-*/
 }
 
 /**
@@ -59,13 +52,6 @@ void SPI_SlowSpeedInit (void)
              (1 << MSTR) |                  // Master device
              (1 << SPR1) |                  // Prescaler fclk/128 = 62500Hz
              (1 << SPR0) ;                  //
-/*
-  // NOTE: SPE must be set as last
-  SET_BIT (SPI_SPCR, MSTR);
-  SET_BIT (SPI_SPCR, SPR0);                 //
-  SET_BIT (SPI_SPCR, SPR1);                 // Prescaler fclk/128 = 62500Hz
-  SET_BIT (SPI_SPCR, SPE);                  // SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator
-*/
 }
 
 /**
@@ -81,14 +67,6 @@ void SPI_FastSpeedInit (void)
              (1 << MSTR) |                  // Master device
              (1 << SPR0) ;                  // f = fclk/16 = 0.5MHz
   SPI_SPSR = (1 << SPI2X);                  // f*2
-/*
-  // NOTE: SPE must be set as last
-  SET_BIT (SPI_SPCR, MSTR);                 // Master device
-  SET_BIT (SPI_SPCR, SPR0);                 //
-  CLR_BIT (SPI_SPCR, SPR1);                 // f = fclk/16 = 0.5MHz
-  SET_BIT (SPI_SPSR, SPI2X);                // f * 2 = 1MHz
-  SET_BIT (SPI_SPCR, SPE);                  // SPI Enale, note: writing a byte to the SPI data reg starts the SPI clock generator
-*/
 }
 
 /**
@@ -125,13 +103,13 @@ void SPI_WriteWord (uint16_t data)
  *
  * @return  uint8_t
  */
- uint8_t SPI_ReadByte (void)
- {
+uint8_t SPI_ReadByte (void)
+{
   SPI_SPDR = 0xFF;                          // start transmission, dummy byte
   while(!(SPI_SPSR & (1<<SPIF)))            // wait for transmission complete
   ;
   return SPI_SPDR;                          // return received byte
- }
+}
 
 /**
  * @desc    SPI Write / Read Byte
@@ -140,10 +118,10 @@ void SPI_WriteWord (uint16_t data)
  *
  * @return  uint8_t
  */
- uint8_t SPI_WriteReadByte (uint8_t data)
- {
+uint8_t SPI_WriteReadByte (uint8_t data)
+{
   SPI_SPDR = data;                          // start transmission
   while(!(SPI_SPSR & (1<<SPIF)))            // wait for transmission complete
   ;
   return SPI_SPDR;                          // return received byte
- }
+}
