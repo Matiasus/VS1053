@@ -1,25 +1,25 @@
-/** 
- * ---------------------------------------------------------------+ 
+/**
+ * ---------------------------------------------------------------+
  * @desc        SPI (Master Mode)
- * ---------------------------------------------------------------+ 
+ * ---------------------------------------------------------------+
  *              Copyright (C) 2022 Marian Hrinko.
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
  *
  * @author      Marian Hrinko
  * @datum       21.10.2022
  * @file        spi.h
- * @update      23.10.2022
+ * @update      14.11.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
- * @depend      
+ * @depend      avr/io.h
  * ---------------------------------------------------------------+
  * @interface   SPI master mode
- * @pins        SCLK, MOSI, MISO, CS (SS) 
+ * @pins        SCLK, MOSI, MISO, CS (SS)
  *
- * @sources    
+ * @sources
  */
- 
+
 #ifndef __SPI_H__
 #define __SPI_H__
 
@@ -34,18 +34,13 @@
     #define SPI_MISO          4     // or DO
     #define SPI_MOSI          3     // or SDA, SDI, DI
     #define SPI_SS            2     // or CS
-    
+
     // SPI registers
     #define SPI_SPSR          SPSR
     #define SPI_SPCR          SPCR
     #define SPI_SPDR          SPDR
-    
-  #endif
 
-  // clear bit
-  #define CLR_BIT(reg, bit)  ( ((reg) &= ~(1 << bit)) )
-  // set bit
-  #define SET_BIT(reg, bit)  ( ((reg) |= (1 << bit)) )
+  #endif
 
   /**
    * @desc    SPI Port Init
@@ -80,7 +75,7 @@
    * @param   uint8_t
    *
    * @return  void
-   */   
+   */
   void SPI_WriteByte (uint8_t);
 
   /**
@@ -89,25 +84,25 @@
    * @param   uint16_t
    *
    * @return  void
-   */   
+   */
   void SPI_WriteWord (uint16_t);
-   
+
   /**
    * @desc    SPI Read Byte
    *
    * @param   void
    *
    * @return  uint8_t
-   */   
+   */
   uint8_t SPI_ReadByte (void);
-   
+
   /**
    * @desc    SPI Write / Read Byte
    *
    * @param   uint8_t
    *
    * @return  uint8_t
-   */   
-   uint8_t SPI_WriteReadByte (uint8_t);  
+   */
+   uint8_t SPI_WriteReadByte (uint8_t);
 
 #endif
