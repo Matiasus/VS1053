@@ -29,7 +29,6 @@
 #include <avr/pgmspace.h>
 #include "vs1053.h"
 
-
 const char vers_0[] PROGMEM = "VS1001"; 
 const char vers_1[] PROGMEM = "VS1011"; 
 const char vers_2[] PROGMEM = "VS1002"; 
