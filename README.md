@@ -1,10 +1,10 @@
 # Library for VS10XX (VS1003)
 
 ## VS10XX Description
-Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf).
+Detailed information are described in [Datasheet VS1003](https://www.vlsi.fi/fileadmin/datasheets/vs1003.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf).
 
 ## Library
-C library is aimed for driving [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus.
+C library is aimed for driving [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC](https://www.vlsi.fi/fileadmin/datasheets/vs1003.pdf) using 7 pin SPI Bus.
 
 ## Hardware connection
 | PIN VS10XX | PIN ATMEGA328P | Description |
@@ -87,6 +87,7 @@ Init sequence of MP3 decoder was defined according to [source code documentation
 ```
 
 ## Links
+- [Datasheet VS1003](https://www.vlsi.fi/fileadmin/datasheets/vs1003.pdf)
 - [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf)
 - [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf)
 - [VLSI Solution Oy Evaluation MP3 Player Source Code Documentation](https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/files.html)
