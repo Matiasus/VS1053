@@ -1,4 +1,4 @@
-# Library for VS10XX
+# Library for VS10XX (VS1003)
 
 ## VS10XX Description
 Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf).
