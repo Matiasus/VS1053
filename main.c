@@ -34,8 +34,6 @@
  */
 int main (void)
 {
-  char * version;
-
   // LCD SSD1306
   // ---------------------------------------
   SSD1306_Init (SSD1306_ADDRESS);
@@ -43,13 +41,13 @@ int main (void)
   // print header info 
   SSD1306_ClearScreen ();
   SSD1306_DrawLine (0, MAX_X, 4, 4);
-  SSD1306_SetPosition (10, 1);
-  SSD1306_DrawString ("VS1053 MP3 DECODER");
+  SSD1306_SetPosition (4, 1);
+  SSD1306_DrawString ("VS10XX AUDIO DECODER");
   SSD1306_DrawLine (0, MAX_X, 18, 18);
 
   // print mp3 init
-  SSD1306_SetPosition (2, 3);
-  SSD1306_DrawString ("MP3 init");
+  SSD1306_SetPosition (1, 3);
+  SSD1306_DrawString ("VS10XX init");
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
 
   // MP3 ENCODER
@@ -62,12 +60,12 @@ int main (void)
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
 
   // Print to lcd
-  SSD1306_SetPosition (2, 4);
-  SSD1306_DrawString ("MP3 sine test");
+  SSD1306_SetPosition (1, 4);
+  SSD1306_DrawString ("VS10XX test");
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
   
   // sine test
-  VS1053_SineTest ();
+  //VS1053_SineTest ();
 
   // print sine test success
   SSD1306_SetPosition (103, 4);
@@ -76,10 +74,10 @@ int main (void)
 
   // read sci register
   // ---------------------------------------
-  SSD1306_SetPosition (2, 5);
-  version = VS1053_GetVersion ();
-  SSD1306_DrawString ("MP3 Version: ");
-  SSD1306_DrawString (version);
+  SSD1306_SetPosition (1, 5);
+  SSD1306_DrawString ("VS10XX vers  [");
+  SSD1306_DrawString (VS1053_GetVersion ());
+  SSD1306_DrawString ("]");
   SSD1306_UpdateScreen (SSD1306_ADDRESS);
 
   // EXIT

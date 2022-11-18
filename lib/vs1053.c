@@ -26,98 +26,25 @@
  */
 
 // INCLUDE libraries
-#include <avr/pgmspace.h>
 #include "vs1053.h"
+#include "vs1053_info.h"
 
-const char vers_0[] PROGMEM = "VS1001"; 
-const char vers_1[] PROGMEM = "VS1011"; 
-const char vers_2[] PROGMEM = "VS1002"; 
-const char vers_3[] PROGMEM = "VS1003"; 
-const char vers_4[] PROGMEM = "VS1053"; 
-const char vers_5[] PROGMEM = "VS1033"; 
-const char vers_6[] PROGMEM = "VS1063"; 
-const char vers_7[] PROGMEM = "VS1103";
+// global variables
+char buffer[VERS_TEXT_LEN];
 
-const char * const versPointers[] PROGMEM = {
-  vers_0, vers_1,
-  vers_2, vers_3,
-  vers_4, vers_5,
-  vers_6, vers_7,
-};
-
-/**
- * @desc    Get Version
- *
- * @param   void
- *
- * @return  const char *
- */
-char * VS1053_GetVersion (void)
-{
-  uint8_t version;
-  static char buffer[6];
-
-  version = (uint8_t) VS1053_ReadSci (SCI_STATUS);
-  version &= VS1053_VERS_MASK >> 4;
-
-  char * ptr = (char *) pgm_read_word (&versPointers[version]);
-  strcpy_P (buffer, ptr);
-
-  return buffer;
-}
-
-/**
- * @desc    Activate Command / clear XCS
- *
- * @param   void
- *
- * @return  void
- */
+/* Activate Command / clear XCS */
 static inline void VS1053_ActivateCommand (void) { VS1053_PORT &= ~(1 << VS1053_XCS); }
-
-/**
- * @desc    Deactivate Command / set XCS
- *
- * @param   void
- *
- * @return  void
- */
+/* Deactivate Command / set XCS */
 static inline void VS1053_DeactivateCommand (void) { VS1053_PORT |= (1 << VS1053_XCS); }
 
-/**
- * @desc    Activate Data / clear XDCS
- *
- * @param   void
- *
- * @return  void
- */
+/* Activate Data / clear XDCS */
 static inline void VS1053_ActivateData (void) { VS1053_PORT &= ~(1 << VS1053_XDCS); }
-
-/**
- * @desc    Deactivate Data / set XDCS
- *
- * @param   void
- *
- * @return  void
- */
+/* Deactivate Data / set XDCS */
 static inline void VS1053_DeactivateData (void) { VS1053_PORT |= (1 << VS1053_XDCS); }
 
-/**
- * @desc    Activate RESET / clear XRST
- *
- * @param   void
- *
- * @return  void
- */
+/* Activate RESET / clear XRST */
 static inline void VS1053_ActivateReset (void) { VS1053_PORT_RES &= ~(1 << VS1053_XRST); }
-
-/**
- * @desc    Deactivate RESET / set XRST
- *
- * @param   void
- *
- * @return  void
- */
+/* Deactivate RESET / set XRST */
 static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS1053_XRST); }
 
 /**
@@ -380,12 +307,33 @@ void VS1053_SineTest (void)
   VS1053_WriteSdi (sine_activate, 8);       // Sine wave data activate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (2000);                         // delay
+  _delay_ms (500);                          // delay
 
   // sine wave sequence stop
   VS1053_ActivateCommand ();                // clear xCS
   VS1053_WriteSdi (sine_deactivate, 8);     // Sine wave data deactivate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (100);                          // delay
+  _delay_ms (500);                          // delay
+}
+
+/**
+ * @desc    Get Version
+ *
+ * @param   void
+ *
+ * @return  char *
+ */
+char * VS1053_GetVersion (void)
+{
+  char * ptr; 
+  uint8_t vers;
+
+  vers = (uint8_t) VS1053_ReadSci (SCI_STATUS);
+  vers &= VS1053_VERS_MASK >> 4;
+
+  ptr = (char *) pgm_read_word (&vs10xx_versions[vers]);
+  strcpy_P (buffer, ptr);
+
+  return buffer;
 }
