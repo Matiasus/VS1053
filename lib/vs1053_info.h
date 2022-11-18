@@ -27,7 +27,6 @@
   #include <avr/pgmspace.h>
 
   #define VERS_TEXT_LEN       6
-  #define VESR_ITEM_LEN       8
 
   const char version_0[] PROGMEM = "VS1001"; 
   const char version_1[] PROGMEM = "VS1011"; 

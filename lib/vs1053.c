@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       19.10.2022
  * @file        vs1053.c
- * @update      14.11.2022
+ * @update      18.11.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -28,6 +28,7 @@
 // INCLUDE libraries
 #include "vs1053.h"
 #include "vs1053_info.h"
+
 
 // global variables
 char buffer[VERS_TEXT_LEN];
@@ -281,7 +282,43 @@ void VS1053_SetVolume (uint8_t left, uint8_t right)
  */
 void VS1053_SineTest (void)
 {
-  uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
+  // Fsinetest = Fs * S/128
+
+  // +----------------------------------+
+  // |             n bits               |
+  // +----------------------------------+
+  // | NAME  | BITS | DESCRIPTION       |
+  // +----------------------------------+
+  // | FsIdx | 7:5  | Sample rate index |
+  // +----------------------------------+
+  // | S     | 4:0  | Sine skip speed   |
+  // +----------------------------------+
+  //
+  // +----------------------------------+
+  // |   FsIdx  |          Fs           |
+  // +----------------------------------+
+  // | b7 b6 b5 |                       |
+  // +----------------------------------+
+  //   0  0  0  |       44100 Hz
+  //   0  0  1  |       48000 Hz
+  //   0  1  0  |       32000 Hz
+  //   0  1  1  |       22050 Hz
+  //   1  0  0  |       24000 Hz
+  //   1  0  1  |       16000 Hz
+  //   1  1  0  |       11025 Hz
+  //   1  1  1  |       12000 Hz
+  // +----------------------------------+
+  //
+  // EXAMPLE: 1kHz
+  // Fs = 32000; S = F * 128 / Fs = 1000 * 128 / 32000 = 4
+  // 32000Hz => FsIdx = 2; S = 4; n = 0b0100 0100 = 0x44
+  //
+  // EXAMPLE: 5kHz
+  // Fs = 32000; S = F * 128 / Fs = 5000 * 128 / 32000 = 20
+  // 32000Hz => FsIdx = 2; S = 20; n = 0b0101 0100 = 0x54
+  uint8_t n = 0x44;
+
+  uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, n, 0, 0, 0, 0};
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 
 /*
@@ -298,7 +335,7 @@ void VS1053_SineTest (void)
 */
 
   VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);           // SCI_MODE
+  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
   VS1053_DeactivateCommand ();              // set xCS
   VS1053_DreqWait ();                       // Wait until DREQ is high
 
@@ -336,4 +373,34 @@ char * VS1053_GetVersion (void)
   strcpy_P (buffer, ptr);
 
   return buffer;
+}
+
+/**
+ * @desc    Test SDI - memory test
+ * @src
+ *
+ * @param   void
+ *
+ * @return  uint16_t
+ */
+uint16_t VS1053_memTest (void)
+{
+  uint16_t data;
+  uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
+
+  VS1053_ActivateCommand ();                // clear xCS
+  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
+  VS1053_DeactivateCommand ();              // set xCS
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+
+  // sine wave sequence start
+  VS1053_ActivateCommand ();                // clear xCS
+  VS1053_WriteSdi (mem_sequence, 8);        // Sine wave data activate
+  VS1053_DeactivateCommand ();              // set xCS
+  _delay_ms (100);                          // wait for 500000 clock cycles ~ 41ms
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+  
+  data = VS1053_ReadSci (SCI_HDAT0);        //  result can be read from the SCI register SCI_HDAT0
+  
+  return data;
 }
