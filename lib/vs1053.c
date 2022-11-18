@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       19.10.2022
  * @file        vs1053.c
- * @update      14.11.2022
+ * @update      18.11.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -28,22 +28,6 @@
 // INCLUDE libraries
 #include <avr/pgmspace.h>
 #include "vs1053.h"
-
-const char vers_0[] PROGMEM = "VS1001"; 
-const char vers_1[] PROGMEM = "VS1011"; 
-const char vers_2[] PROGMEM = "VS1002"; 
-const char vers_3[] PROGMEM = "VS1003"; 
-const char vers_4[] PROGMEM = "VS1053"; 
-const char vers_5[] PROGMEM = "VS1033"; 
-const char vers_6[] PROGMEM = "VS1063"; 
-const char vers_7[] PROGMEM = "VS1103";
-
-const char * const versPointers[] PROGMEM = {
-  vers_0, vers_1,
-  vers_2, vers_3,
-  vers_4, vers_5,
-  vers_6, vers_7,
-};
 
 /**
  * @desc    Get Version
@@ -354,7 +338,43 @@ void VS1053_SetVolume (uint8_t left, uint8_t right)
  */
 void VS1053_SineTest (void)
 {
-  uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, 0x44, 0, 0, 0, 0};
+  // Fsinetest = Fs * S/128
+
+  // +----------------------------------+
+  // |             n bits               |
+  // +----------------------------------+
+  // | NAME  | BITS | DESCRIPTION       |
+  // +----------------------------------+
+  // | FsIdx | 7:5  | Sample rate index |
+  // +----------------------------------+
+  // | S     | 4:0  | Sine skip speed   |
+  // +----------------------------------+
+  //
+  // +----------------------------------+
+  // |   FsIdx  |          Fs           |
+  // +----------------------------------+
+  // | b7 b6 b5 |                       |
+  // +----------------------------------+
+  //   0  0  0  |       44100 Hz
+  //   0  0  1  |       48000 Hz
+  //   0  1  0  |       32000 Hz
+  //   0  1  1  |       22050 Hz
+  //   1  0  0  |       24000 Hz
+  //   1  0  1  |       16000 Hz
+  //   1  1  0  |       11025 Hz
+  //   1  1  1  |       12000 Hz
+  // +----------------------------------+
+  //
+  // EXAMPLE: 1kHz
+  // Fs = 32000; S = F * 128 / Fs = 1000 * 128 / 32000 = 4
+  // 32000Hz => FsIdx = 2; S = 4; n = 0b0100 0100 = 0x44
+  //
+  // EXAMPLE: 5kHz
+  // Fs = 32000; S = F * 128 / Fs = 5000 * 128 / 32000 = 20
+  // 32000Hz => FsIdx = 2; S = 20; n = 0b0101 0100 = 0x54
+  uint8_t n = 0x44;
+
+  uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, n, 0, 0, 0, 0};
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 
 /*
