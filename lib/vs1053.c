@@ -391,7 +391,7 @@ void VS1053_SineTest (void)
 */
 
   VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);           // SCI_MODE
+  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
   VS1053_DeactivateCommand ();              // set xCS
   VS1053_DreqWait ();                       // Wait until DREQ is high
 
@@ -408,4 +408,34 @@ void VS1053_SineTest (void)
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
   _delay_ms (100);                          // delay
+}
+
+/**
+ * @desc    Test SDI - memory test
+ * @src
+ *
+ * @param   void
+ *
+ * @return  uint16_t
+ */
+uint16_t VS1053_memTest (void)
+{
+  uint16_t data;
+  uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
+
+  VS1053_ActivateCommand ();                // clear xCS
+  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
+  VS1053_DeactivateCommand ();              // set xCS
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+
+  // sine wave sequence start
+  VS1053_ActivateCommand ();                // clear xCS
+  VS1053_WriteSdi (mem_sequence, 8);        // Sine wave data activate
+  VS1053_DeactivateCommand ();              // set xCS
+  _delay_ms (100);                          // wait for 500000 clock cycles ~ 41ms
+  VS1053_DreqWait ();                       // Wait until DREQ is high
+  
+  data = VS1053_ReadSci (SCI_HDAT0);        //  result can be read from the SCI register SCI_HDAT0
+  
+  return data;
 }
