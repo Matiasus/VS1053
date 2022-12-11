@@ -103,6 +103,9 @@
   #define VS1053_READ         0x3
   #define VS1053_WRITE        0x2
 
+  #define FREQ_1kHz           0x44
+  #define FREQ_5kHz           0x54  
+
   // Version
   #define VS1053_VERS_MASK    0xF0
 
@@ -186,11 +189,21 @@
   /**
    * @desc    Test SDI - sine test
    *
-   * @param   void
+   * @param   uint8_t
    *
    * @return  void
    */
-  void VS1053_SineTest (void);
+  void VS1053_SineTest (uint8_t);
+
+  /**
+   * @desc    Test SDI - memory test
+   * @src
+   *
+   * @param   void
+   *
+   * @return  uint16_t
+   */
+  uint16_t VS1053_memTest (void);
 
   /**
    * @desc    Get Version

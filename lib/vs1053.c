@@ -28,7 +28,7 @@
 // INCLUDE libraries
 #include "vs1053.h"
 #include "vs1053_info.h"
-
+//#include "vs1053_hello.h"
 
 // global variables
 char buffer[VERS_TEXT_LEN];
@@ -276,11 +276,11 @@ void VS1053_SetVolume (uint8_t left, uint8_t right)
  * @desc    Test SDI - sine test
  * @src     https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c-source.html
  *
- * @param   void
+ * @param   uint8_t
  *
  * @return  void
  */
-void VS1053_SineTest (void)
+void VS1053_SineTest (uint8_t n)
 {
   // Fsinetest = Fs * S/128
 
@@ -316,8 +316,6 @@ void VS1053_SineTest (void)
   // EXAMPLE: 5kHz
   // Fs = 32000; S = F * 128 / Fs = 5000 * 128 / 32000 = 20
   // 32000Hz => FsIdx = 2; S = 20; n = 0b0101 0100 = 0x54
-  uint8_t n = 0x44;
-
   uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, n, 0, 0, 0, 0};
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 
@@ -344,14 +342,14 @@ void VS1053_SineTest (void)
   VS1053_WriteSdi (sine_activate, 8);       // Sine wave data activate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (500);                          // delay
+  _delay_ms (2000);                         // delay
 
   // sine wave sequence stop
   VS1053_ActivateCommand ();                // clear xCS
   VS1053_WriteSdi (sine_deactivate, 8);     // Sine wave data deactivate
   VS1053_DreqWait ();                       // Wait until DREQ is high
   VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (500);                          // delay
+  _delay_ms (100);                          // delay
 }
 
 /**

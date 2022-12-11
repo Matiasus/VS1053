@@ -34,21 +34,20 @@
  */
 int main (void)
 {
+  //char str[10];
+
   // LCD SSD1306
   // ---------------------------------------
-  SSD1306_Init (SSD1306_ADDRESS);
+  SSD1306_Init ();
 
   // print header info 
   SSD1306_ClearScreen ();
-  SSD1306_DrawLine (0, MAX_X, 4, 4);
-  SSD1306_SetPosition (4, 1);
-  SSD1306_DrawString ("VS10XX AUDIO DECODER");
-  SSD1306_DrawLine (0, MAX_X, 18, 18);
+  SSD1306_SetPosition (3, 0);
+  SSD1306_DrawString ("VS10XX AUDIO DECODER", NORMAL);
 
   // print mp3 init
   SSD1306_SetPosition (1, 3);
-  SSD1306_DrawString ("VS10XX init");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  SSD1306_DrawString ("VS10XX init", NORMAL);
 
   // MP3 ENCODER
   // ---------------------------------------
@@ -56,30 +55,35 @@ int main (void)
 
   // print mp3 init success
   SSD1306_SetPosition (103, 3);
-  SSD1306_DrawString ("[OK]");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  SSD1306_DrawString ("[OK]", NORMAL);
 
   // Print to lcd
   SSD1306_SetPosition (1, 4);
-  SSD1306_DrawString ("VS10XX test");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  SSD1306_DrawString ("VS10XX test", NORMAL);
   
-  // sine test
-  //VS1053_SineTest ();
+  // sine test 1kHz
+  VS1053_SineTest (FREQ_1kHz);
+  // sine test 5kHz
+  VS1053_SineTest (FREQ_5kHz);
 
   // print sine test success
   SSD1306_SetPosition (103, 4);
-  SSD1306_DrawString ("[OK]");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
+  SSD1306_DrawString ("[OK]", NORMAL);
 
   // read sci register
   // ---------------------------------------
   SSD1306_SetPosition (1, 5);
-  SSD1306_DrawString ("VS10XX vers  [");
-  SSD1306_DrawString (VS1053_GetVersion ());
-  SSD1306_DrawString ("]");
-  SSD1306_UpdateScreen (SSD1306_ADDRESS);
-
+  SSD1306_DrawString ("VS10XX vers  [", NORMAL);
+  SSD1306_DrawString (VS1053_GetVersion (), NORMAL);
+  SSD1306_DrawString ("]", NORMAL);
+/*
+  // read sci register
+  // ---------------------------------------
+  SSD1306_SetPosition (1, 6);
+  SSD1306_DrawString ("VS10XX mem   [", NORMAL);
+  sprintf (str, "0x%x", VS1053_memTest (), NORMAL);
+  SSD1306_DrawString ("]", NORMAL);
+*/
   // EXIT
   // -------------------------------------------------
   return 0;
