@@ -85,6 +85,8 @@ Init sequence of MP3 decoder was defined according to [source code documentation
 // |       SPCR <= SET (SPE, MSTR, SPR0)         |
 // +---------------------------------------------+
 ```
+## Demonstration version v1.0.0
+<img src="img/vs10xx_v100.jpg" />
 
 ## Links
 - [Datasheet VS1003](https://www.vlsi.fi/fileadmin/datasheets/vs1003.pdf)
