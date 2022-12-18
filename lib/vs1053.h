@@ -100,14 +100,16 @@
   #define SS_REFERENCE_SEL    0  //
 
   // READ / WRITE
-  #define VS1053_READ         0x3
-  #define VS1053_WRITE        0x2
+  #define VS10XX_READ         0x3
+  #define VS10XX_WRITE        0x2
 
-  #define FREQ_1kHz           0x44
-  #define FREQ_5kHz           0x54  
+  #define VS1003_MEMTEST_OK   0x807f
+
+  #define VS10XX_FREQ_1kHz    0x44
+  #define VS10XX_FREQ_5kHz    0x54  
 
   // Version
-  #define VS1053_VERS_MASK    0xF0
+  #define VS10XX_VERS_MASK    0xF0
 
   /**
    * @desc    Write Serial Command Instruction

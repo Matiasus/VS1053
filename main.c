@@ -34,56 +34,47 @@
  */
 int main (void)
 {
-  //char str[10];
-
-  // LCD SSD1306
+  // init LCD SSD1306
   // -------------------------------------------------------------------------------------
-  SSD1306_Init ();
-
-  // print header info 
+  SSD1306_Init ();                                                // init lcd
   SSD1306_ClearScreen ();
-  SSD1306_SetPosition (3, 0);
-  SSD1306_DrawString ("VS10XX AUDIO DECODER", NORMAL);
+  SSD1306_SetPosition (10, 0);
+  SSD1306_DrawString ("VS10XX AUDIO CODEC ", NORMAL);
 
-  // print mp3 init
-  SSD1306_SetPosition (1, 3);
-  SSD1306_DrawString ("VS10XX init", NORMAL);
-
-  // MP3 ENCODER
+  // init MP3 decoder
   // -------------------------------------------------------------------------------------
-  VS1053_Init ();
-
-  // print mp3 init success
-  SSD1306_SetPosition (103, 3);
+  SSD1306_SetPosition (1, 2);
+  SSD1306_DrawString ("VS10XX init", NORMAL);
+  VS1053_Init ();                                                 // init decoder
+  SSD1306_SetPosition (103, 2);
   SSD1306_DrawString ("[OK]", NORMAL);
 
-  // Print to lcd
-  SSD1306_SetPosition (1, 4);
-  SSD1306_DrawString ("VS10XX test", NORMAL);
-  
-  // sine test 1kHz
-  VS1053_SineTest (FREQ_1kHz);
-  // sine test 5kHz
-  VS1053_SineTest (FREQ_5kHz);
+  // mem test
+  // -------------------------------------------------------------------------------------
+  SSD1306_SetPosition (1, 3);
+  SSD1306_DrawString ("VS10XX mem test", NORMAL);
+  SSD1306_SetPosition (103, 3);
+  if (VS1053_memTest () == VS1003_MEMTEST_OK) {
+    SSD1306_DrawString ("[OK]", NORMAL);
+  } else {
+    SSD1306_DrawString ("[KO]", NORMAL);
+  }
 
-  // print sine test success
+  // sine test
+  // -------------------------------------------------------------------------------------
+  SSD1306_SetPosition (1, 4);
+  SSD1306_DrawString ("VS10XX sine test", NORMAL);
+  VS1053_SineTest (VS10XX_FREQ_1kHz);                             // sine test 1kHz
+  VS1053_SineTest (VS10XX_FREQ_5kHz);                             // sine test 5kHz
   SSD1306_SetPosition (103, 4);
   SSD1306_DrawString ("[OK]", NORMAL);
 
-  // read sci register
+
+  // get version of MP3 decoder
   // -------------------------------------------------------------------------------------
-  SSD1306_SetPosition (1, 5);
-  SSD1306_DrawString ("VS10XX vers  [", NORMAL);
-  SSD1306_DrawString (VS1053_GetVersion (), NORMAL);
-  SSD1306_DrawString ("]", NORMAL);
-/*
-  // read sci register
-  // -------------------------------------------------------------------------------------
-  SSD1306_SetPosition (1, 6);
-  SSD1306_DrawString ("VS10XX mem   [", NORMAL);
-  sprintf (str, "0x%x", VS1053_memTest (), NORMAL);
-  SSD1306_DrawString ("]", NORMAL);
-*/
+  SSD1306_SetPosition (10, 0);
+  SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);          // get decoder version
+
   // EXIT
   // -------------------------------------------------------------------------------------
   return 0;

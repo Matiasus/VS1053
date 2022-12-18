@@ -74,13 +74,13 @@ static inline uint8_t VS1053_DreqWait (void)
  */
 void VS1053_WriteSci (uint8_t addr, uint16_t cmnd)
 {
-  VS1053_DreqWait ();                       // wait until DREQ is high
-  VS1053_ActivateCommand ();                // clear xCS
-  SPI_WriteByte (VS1053_WRITE);             // command code for WRITE
-  SPI_WriteByte (addr);                     // SCI register number
-  SPI_WriteByte ((uint8_t)(cmnd >> 8));     // high byte
-  SPI_WriteByte ((uint8_t)(cmnd & 0xFF));   // low byte
-  VS1053_DeactivateCommand ();              // set xCS
+  VS1053_DreqWait ();                             // wait until DREQ is high
+  VS1053_ActivateCommand ();                      // clear xCS
+  SPI_WriteByte (VS10XX_WRITE);                   // command code for WRITE
+  SPI_WriteByte (addr);                           // SCI register number
+  SPI_WriteByte ((uint8_t)(cmnd >> 8));           // high byte
+  SPI_WriteByte ((uint8_t)(cmnd & 0xFF));         // low byte
+  VS1053_DeactivateCommand ();                    // set xCS
 }
 
 /**
@@ -94,15 +94,15 @@ uint16_t VS1053_ReadSci (uint8_t addr)
 {
   uint16_t data;
 
-  VS1053_DreqWait ();                       // wait until DREQ is high
-  VS1053_ActivateCommand ();                // clear xCS
-  SPI_WriteByte (VS1053_READ);              // command code for READ
-  SPI_WriteByte (addr);                     // SCI register number
-  data = (uint16_t)SPI_ReadByte() << 8;     // high byte
-  data |= SPI_ReadByte();                   // low byte
-  VS1053_DeactivateCommand ();              // set xCS
+  VS1053_DreqWait ();                             // wait until DREQ is high
+  VS1053_ActivateCommand ();                      // clear xCS
+  SPI_WriteByte (VS10XX_READ);                    // command code for READ
+  SPI_WriteByte (addr);                           // SCI register number
+  data = (uint16_t) SPI_ReadByte () << 8;         // high byte
+  data |= SPI_ReadByte ();                        // low byte
+  VS1053_DeactivateCommand ();                    // set xCS
 
-  return data;                              // return content
+  return data;                                    // return content
 }
 
 /**
@@ -116,22 +116,22 @@ void VS1053_TestSci (void)
 {
   while (1)
   {
-    VS1053_ActivateCommand ();              // clear xCS
-    VS1053_WriteSci (SCI_VOL, 0x0000);      // set full volume
-    VS1053_DeactivateCommand ();            // set xCS
-    _delay_ms (500);                        // delay
+    VS1053_ActivateCommand ();                    // clear xCS
+    VS1053_WriteSci (SCI_VOL, 0x0000);            // set full volume
+    VS1053_DeactivateCommand ();                  // set xCS
+    _delay_ms (500);                              // delay
 
-    VS1053_ActivateCommand ();              // clear xCS
-    VS1053_WriteSci (SCI_VOL, 0xFFFF);      // set full volume
-    VS1053_DeactivateCommand ();            // set xCS
-    _delay_ms (500);                        // delay
+    VS1053_ActivateCommand ();                    // clear xCS
+    VS1053_WriteSci (SCI_VOL, 0xFFFF);            // set full volume
+    VS1053_DeactivateCommand ();                  // set xCS
+    _delay_ms (500);                              // delay
   }
 }
 
 /**
  * @desc    Write Serial Data
  *
- * @param   uint8_t * data
+ * @param   const uint8_t * data
  * @param   uint8_t bytes
  *
  * @return  int
@@ -140,18 +140,18 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
 {
   uint8_t i;
 
-  if (bytes > 32) {                         // error: Too many bytes to transfer!
+  if (bytes > 32) {                               // error: Too many bytes to transfer!
     return -1;
   }
 
-  VS1053_DreqWait ();                       // wait until DREQ is high
-  VS1053_ActivateData ();                   // clear xDCS
-  for (i = 0; i < bytes; i++) {             // send data
-    SPI_WriteByte (*data++);                //
-  }                                         //
-  VS1053_DeactivateData ();                 // set xDCS
+  VS1053_DreqWait ();                             // wait until DREQ is high
+  VS1053_ActivateData ();                         // clear xDCS
+  for (i = 0; i < bytes; i++) {                   // send data
+    SPI_WriteByte (*data++);                      //
+  }                                               //
+  VS1053_DeactivateData ();                       // set xDCS
 
-  return 0;                                 // success
+  return 0;                                       // success
 }
 /**
  * @desc    Hard reset
@@ -163,16 +163,16 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
  */
 void VS1053_Reset (void)
 {
-  VS1053_ActivateReset ();                  // clear XRST
-  _delay_ms (2);                            // after a hardware reset (or at power-up) DREQ will stay down for around 22000 clock cycles,
-                                            // which means an approximate 1.8 ms delay if VS1053b is run at 12.288 MHz
-  SPI_WriteByte (0xFF);                     // send dummy SPI byte to initialize SPI
+  VS1053_ActivateReset ();                        // clear XRST
+  _delay_ms (2);                                  // after a hardware reset (or at power-up) DREQ will stay down for around 22000 clock cycles,
+                                                  // which means an approximate 1.8 ms delay if VS1053b is run at 12.288 MHz
+  SPI_WriteByte (0xFF);                           // send dummy SPI byte to initialize SPI
 
   // Un-reset MP3 chip
-  VS1053_DeactivateCommand ();              // set xCS
-  VS1053_DeactivateData ();                 // set xDCS
-  VS1053_DeactivateReset ();                // set XRST
-  VS1053_SetVolume (0xff,0xff);             // activate analog powerdown mode
+  VS1053_DeactivateCommand ();                    // set xCS
+  VS1053_DeactivateData ();                       // set xDCS
+  VS1053_DeactivateReset ();                      // set XRST
+  VS1053_SetVolume (0xff,0xff);                   // activate analog powerdown mode
 
   // SCI_CLOCKF register
   // ---------------------------------------
@@ -197,18 +197,18 @@ void VS1053_Reset (void)
   // SC_FREQ = 0 then XTALI = 12.288 MHz
   //   12.288MHz * 3.5 and
   //   12.288MHz * 5.5 if more cycles are temporarily needed to decode a WMA or AAC stream
-  VS1053_WriteSci (SCI_CLOCKF, 0x9800);     // vlsi sulution 0x9CCC (XTALI=1291200Hz)
-  VS1053_DreqWait ();                       // wait until DREQ is high
+  VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // vlsi sulution 0x9CCC (XTALI=1291200Hz)
+  VS1053_DreqWait ();                             // wait until DREQ is high
 
-  VS1053_WriteSci (SCI_AUDATA, 0x000A);     // slow sample rate for slow analog part startup 10 Hz
-  _delay_ms (100);                          // delay
+  VS1053_WriteSci (SCI_AUDATA, 0x000A);           // slow sample rate for slow analog part startup 10 Hz
+  _delay_ms (100);                                // delay
 
-  VS1053_SetVolume (0xfe,0xfe);             // switch on the analog parts
-  VS1053_WriteSci (SCI_AUDATA, 0x1F41);     // 8kHz, mono
-  VS1053_SetVolume (0x66,0x66);             // Set volume level
+  VS1053_SetVolume (0xfe,0xfe);                   // switch on the analog parts
+  VS1053_WriteSci (SCI_AUDATA, 0x1F41);           // 8kHz, mono
+  VS1053_SetVolume (0x66,0x66);                   // Set volume level
 
-  VS1053_SoftReset();                       // soft reset
-  SPI_FastSpeedInit ();                     // f = fclk/16 * 2 = 1MHz
+  VS1053_SoftReset();                             // soft reset
+  SPI_FastSpeedInit ();                           // f = fclk/16 * 2 = 1MHz
 }
 
 /**
@@ -221,21 +221,21 @@ void VS1053_Reset (void)
  */
 void VS1053_SoftReset (void)
 {
-  VS1053_WriteSci (SCI_MODE, 0x0804);       // VS10xx native SPI modes, Soft reset
-  _delay_ms (1);                            // delay
-  VS1053_DreqWait ();                       // wait until DREQ is high
+  VS1053_WriteSci (SCI_MODE, 0x0804);             // VS10xx native SPI modes, Soft reset
+  _delay_ms (1);                                  // delay
+  VS1053_DreqWait ();                             // wait until DREQ is high
 
-  VS1053_WriteSci (SCI_CLOCKF, 0x9800);     // set clock cycles / 0x9ccc in source code
-  _delay_ms (1);                            // delay
-  VS1053_DreqWait ();                       // wait until DREQ is high
+  VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // set clock cycles / 0x9ccc in source code
+  _delay_ms (1);                                  // delay
+  VS1053_DreqWait ();                             // wait until DREQ is high
 
-  VS1053_ActivateData ();                   // clear xDCS / Select data
-  SPI_WriteByte (0);                        // send 4 x 0
+  VS1053_ActivateData ();                         // clear xDCS / Select data
+  SPI_WriteByte (0);                              // send 4 x 0
   SPI_WriteByte (0);
   SPI_WriteByte (0);
   SPI_WriteByte (0);
-  //SPI_ReadByte ();                        // wait for SPI ready to send
-  VS1053_DeactivateData ();                 // set xDCS / Deselect data
+  //SPI_ReadByte ();                              // wait for SPI ready to send
+  VS1053_DeactivateData ();                       // set xDCS / Deselect data
 }
 
 /**
@@ -247,15 +247,15 @@ void VS1053_SoftReset (void)
  */
 void VS1053_Init (void)
 {
-  VS1053_DDR |= (1 << VS1053_XDCS);         // DATA SELECT as output
-  VS1053_DDR &= ~(1 << VS1053_DREQ);        // DATA REQUEST as input
-  VS1053_PORT |= (1 << VS1053_DREQ);        // DATA REQUEST pullup activate
-  VS1053_DDR_RES |= (1 << VS1053_XRST);     // RESET as output
+  VS1053_DDR |= (1 << VS1053_XDCS);               // DATA SELECT as output
+  VS1053_DDR &= ~(1 << VS1053_DREQ);              // DATA REQUEST as input
+  VS1053_PORT |= (1 << VS1053_DREQ);              // DATA REQUEST pullup activate
+  VS1053_DDR_RES |= (1 << VS1053_XRST);           // RESET as output
 
-  SPI_PortInit ();                          // output={MOSI;SCLK;CS} input={MISO}
-  SPI_SlowSpeedInit ();                     // f = fclk/128 = 62500Hz
+  SPI_PortInit ();                                // output={MOSI;SCLK;CS} input={MISO}
+  SPI_SlowSpeedInit ();                           // f = fclk/128 = 62500Hz
 
-  VS1053_Reset ();                          // init reset routine
+  VS1053_Reset ();                                // init reset routine
 }
 
 /**
@@ -299,57 +299,48 @@ void VS1053_SineTest (uint8_t n)
   // +----------------------------------+
   // | b7 b6 b5 |                       |
   // +----------------------------------+
-  //   0  0  0  |       44100 Hz
-  //   0  0  1  |       48000 Hz
-  //   0  1  0  |       32000 Hz
-  //   0  1  1  |       22050 Hz
-  //   1  0  0  |       24000 Hz
-  //   1  0  1  |       16000 Hz
-  //   1  1  0  |       11025 Hz
-  //   1  1  1  |       12000 Hz
+  //   0  0  0  |       44100 Hz        |
+  //   0  0  1  |       48000 Hz        |
+  //   0  1  0  |       32000 Hz        |
+  //   0  1  1  |       22050 Hz        |
+  //   1  0  0  |       24000 Hz        |
+  //   1  0  1  |       16000 Hz        |
+  //   1  1  0  |       11025 Hz        |
+  //   1  1  1  |       12000 Hz        |
   // +----------------------------------+
   //
   // EXAMPLE: 1kHz
+  // ------------------------------------
   // Fs = 32000; S = F * 128 / Fs = 1000 * 128 / 32000 = 4
   // 32000Hz => FsIdx = 2; S = 4; n = 0b0100 0100 = 0x44
   //
   // EXAMPLE: 5kHz
+  // ------------------------------------
   // Fs = 32000; S = F * 128 / Fs = 5000 * 128 / 32000 = 20
   // 32000Hz => FsIdx = 2; S = 20; n = 0b0101 0100 = 0x54
   uint8_t sine_activate[] = {0x53, 0xEF, 0x6E, n, 0, 0, 0, 0};
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 
-/*
-  // use only if no reset is defined before
-  VS1053_ActivateReset ();                  // clear XRST
-  _delay_ms (100);                          // delay 100ms
-  SPI_WriteByte (0xFF);                     // send dummy SPI byte to initialize SPI
-
-  // Un-reset MP3 chip
-  VS1053_DeactivateCommand ();              // set xCS
-  VS1053_DeactivateData ();                 // set xDCS
-  VS1053_DeactivateReset ();                // set XRST
-  _delay_ms (100);                          // delay 100ms
-*/
-
-  VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
-  VS1053_DeactivateCommand ();              // set xCS
-  VS1053_DreqWait ();                       // Wait until DREQ is high
+  VS1053_ActivateCommand ();                      // clear xCS
+  VS1053_WriteSci (0x00, 0x0820);                 // SM_SDINEW | SM_TESTS
+  VS1053_DeactivateCommand ();                    // set xCS
+  VS1053_DreqWait ();                             // Wait until DREQ is high
 
   // sine wave sequence start
-  VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSdi (sine_activate, 8);       // Sine wave data activate
-  VS1053_DreqWait ();                       // Wait until DREQ is high
-  VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (2000);                         // delay
+  VS1053_ActivateCommand ();                      // clear xCS
+  VS1053_WriteSdi (sine_activate, 8);             // Sine wave data activate
+  VS1053_DreqWait ();                             // Wait until DREQ is high
+  VS1053_DeactivateCommand ();                    // set xCS
+  _delay_ms (2000);                               // delay
 
   // sine wave sequence stop
-  VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSdi (sine_deactivate, 8);     // Sine wave data deactivate
-  VS1053_DreqWait ();                       // Wait until DREQ is high
-  VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (100);                          // delay
+  VS1053_ActivateCommand ();                      // clear xCS
+  VS1053_WriteSdi (sine_deactivate, 8);           // Sine wave data deactivate
+  VS1053_DreqWait ();                             // Wait until DREQ is high
+  VS1053_DeactivateCommand ();                    // set xCS
+  _delay_ms (100);                                // delay
+
+  VS1053_SoftReset ();                            // soft reset
 }
 
 /**
@@ -361,16 +352,16 @@ void VS1053_SineTest (uint8_t n)
  */
 char * VS1053_GetVersion (void)
 {
-  char * ptr; 
-  uint8_t vers;
+  char * p;                                       // pointer to string
+  uint8_t v;                                      // version
 
-  vers = (uint8_t) VS1053_ReadSci (SCI_STATUS);
-  vers &= VS1053_VERS_MASK >> 4;
+  v = (uint8_t) VS1053_ReadSci (SCI_STATUS);      // read lower byte
+  v &= VS10XX_VERS_MASK >> 4;                     // read upper nibble
 
-  ptr = (char *) pgm_read_word (&vs10xx_versions[vers]);
-  strcpy_P (buffer, ptr);
+  p = (char *) pgm_read_word (&vs10xx_vers[v]);   // read version value
+  strcpy_P (buffer, p);                           // copy content into buffer
 
-  return buffer;
+  return buffer;                                  // return string
 }
 
 /**
@@ -386,19 +377,21 @@ uint16_t VS1053_memTest (void)
   uint16_t data;
   uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
 
-  VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);           // SM_SDINEW | SM_TESTS
-  VS1053_DeactivateCommand ();              // set xCS
-  VS1053_DreqWait ();                       // Wait until DREQ is high
+  VS1053_ActivateCommand ();                      // clear xCS
+  VS1053_WriteSci (0x00, 0x0820);                 // SM_SDINEW | SM_TESTS
+  VS1053_DeactivateCommand ();                    // set xCS
+  VS1053_DreqWait ();                             // Wait until DREQ is high
 
   // sine wave sequence start
-  VS1053_ActivateCommand ();                // clear xCS
-  VS1053_WriteSdi (mem_sequence, 8);        // Sine wave data activate
-  VS1053_DeactivateCommand ();              // set xCS
-  _delay_ms (100);                          // wait for 500000 clock cycles ~ 41ms
-  VS1053_DreqWait ();                       // Wait until DREQ is high
+  VS1053_ActivateCommand ();                      // clear xCS
+  VS1053_WriteSdi (mem_sequence, 8);              // memory test sequence
+  VS1053_DeactivateCommand ();                    // set xCS
+  _delay_ms (100);                                // wait for 500000 clock cycles ~ 41ms
+  VS1053_DreqWait ();                             // Wait until DREQ is high
   
-  data = VS1053_ReadSci (SCI_HDAT0);        //  result can be read from the SCI register SCI_HDAT0
-  
+  data = VS1053_ReadSci (SCI_HDAT0);              // result read from the SCI reg SCI_HDAT0
+
+  VS1053_SoftReset ();                            // soft reset
+
   return data;
 }
