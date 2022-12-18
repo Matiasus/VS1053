@@ -69,7 +69,6 @@ int main (void)
   SSD1306_SetPosition (103, 4);
   SSD1306_DrawString ("[OK]", NORMAL);
 
-
   // get version of MP3 decoder
   // -------------------------------------------------------------------------------------
   SSD1306_SetPosition (10, 0);
