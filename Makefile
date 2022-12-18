@@ -91,8 +91,11 @@ main: $(TARGET).hex
 # Create hex file
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) $(OBJFLAGS) $(TARGET).elf $(TARGET).hex
+	@echo "--------------------------------------------------------------" 
 	$(AVRSIZE) $(TARGET).elf
-
+	@echo "--------------------------------------------------------------" 
+	$(AVRSIZE) -C --mcu=$(DEVICE) $(TARGET).elf
+	@echo "--------------------------------------------------------------" 
 # 
 # Create .elf file
 $(TARGET).elf:$(OBJECTS) 
