@@ -91,11 +91,8 @@ main: $(TARGET).hex
 # Create hex file
 $(TARGET).hex: $(TARGET).elf
 	$(OBJCOPY) $(OBJFLAGS) $(TARGET).elf $(TARGET).hex
-	@echo "--------------------------------------------------------------" 
+	@echo "-----------------------------------------------------------------------" 
 	$(AVRSIZE) $(TARGET).elf
-	@echo "--------------------------------------------------------------" 
-	$(AVRSIZE) -C --mcu=$(DEVICE) $(TARGET).elf
-	@echo "--------------------------------------------------------------" 
 # 
 # Create .elf file
 $(TARGET).elf:$(OBJECTS) 
@@ -108,17 +105,26 @@ $(TARGET).elf:$(OBJECTS)
 
 # 
 # Program avr - send file to programmer
-flash: 
+flash:
+	@echo "-----------------------------------------------------------------------"
 	$(AVRDUDE) $(AVRDUDE_FLAGS) flash:w:$(TARGET).hex:i
 
 #
+# Size
+size: 
+	@echo "-----------------------------------------------------------------------"
+	$(AVRSIZE) -C --mcu=$(DEVICE) $(TARGET).elf
+
+#
 # Clean
-clean: 
+clean:
+	@echo "-----------------------------------------------------------------------"
 	rm -f $(OBJECTS) $(TARGET).elf $(TARGET).map
 
 #
 # Cleanall
-cleanall: 
+cleanall:
+	@echo "-----------------------------------------------------------------------"
 	rm -f $(OBJECTS) $(TARGET).hex $(TARGET).elf $(TARGET).map
 
 
