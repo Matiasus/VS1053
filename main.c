@@ -6,10 +6,10 @@
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
  *
  * @author      Marian Hrinko
- * @datum       19.10.2022
+ * @date        19.10.2022
+ * @update      18.12.2022
  * @file        main.c
- * @update      23.10.2022
- * @version     1.0
+ * @version     1.0.0
  * @tested      AVR Atmega328p
  *
  * @depend      lib/lcd/ssd1306.h, lib/vs1053.h
@@ -72,7 +72,7 @@ int main (void)
   // get version of MP3 decoder
   // -------------------------------------------------------------------------------------
   SSD1306_SetPosition (10, 0);
-  SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);          // get decoder version
+  SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);          // print decoder version
 
   // EXIT
   // -------------------------------------------------------------------------------------
