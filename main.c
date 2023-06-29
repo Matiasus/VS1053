@@ -82,7 +82,7 @@ int main (void)
   // -------------------------------------------------------------------------------------  
   while (1) {
     p = HelloMP3;
-    while (p <= HelloMP3[sizeof(HelloMP3)-1]) {
+    while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
       while (VS1053_PORT & (1 << VS1053_DREQ)) {                 // wait until DREQ is high
         VS1053_DreqWait ();                                      // DREQ Wait
         VS1053_DeactivateData ();                                // set xDCS
