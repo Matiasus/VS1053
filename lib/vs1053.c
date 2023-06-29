@@ -197,7 +197,8 @@ void VS1053_Reset (void)
   // SC_FREQ = 0 then XTALI = 12.288 MHz
   //   12.288MHz * 3.5 and
   //   12.288MHz * 5.5 if more cycles are temporarily needed to decode a WMA or AAC stream
-  VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // vlsi sulution 0x9CCC (XTALI=1291200Hz)
+  //VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // vlsi sulution 0x9CCC (XTALI=1291200Hz)
+  VS1053_WriteSci (SCI_CLOCKF, 0x8800);           // http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
   VS1053_DreqWait ();                             // wait until DREQ is high
 
   VS1053_WriteSci (SCI_AUDATA, 0x000A);           // slow sample rate for slow analog part startup 10 Hz
