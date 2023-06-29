@@ -36,6 +36,7 @@
 int main (void)
 {
   unsigned char *p;
+  uint16_t i;
   
   // init LCD SSD1306
   // -------------------------------------------------------------------------------------
@@ -83,13 +84,21 @@ int main (void)
   while (1) {
     p = HelloMP3;
     while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
-      while (VS1053_PORT & (1 << VS1053_DREQ)) {                 // wait until DREQ down
+      while (!(VS1053_PORT & (1 << VS1053_DREQ))) {              // DREQ wait
         VS1053_DreqWait ();                                      // DREQ Wait
         VS1053_DeactivateData ();                                // set xDCS
       }
       VS1053_ActivateData ();                                    // clear xDCS
       SPI_WriteByte (pgm_read_byte(p++));                        // send data
     }
+    // ----------------------------------------------------------------------------------
+    VS1053_ActivateData ();                                      // clear xDCS
+    for (i = 0; i < 2048; i++) {                                 // send 2048 zeros
+      while (!(VS1053_PORT & (1 << VS1053_DREQ)))
+        ;
+      SPI_WriteByte (0);                                         // send zero
+    }
+    VS1053_DeactivateData ();                                    // set xDCS
   }
   
   // EXIT
