@@ -23,6 +23,7 @@
 
 // INCLUDE libraries
 #include "lib/vs1053.h"
+#include "lib/vs1053?_hello.h"
 #include "lib/lcd/ssd1306.h"
 
 /**
@@ -34,6 +35,8 @@
  */
 int main (void)
 {
+  unsigned char *p;
+  
   // init LCD SSD1306
   // -------------------------------------------------------------------------------------
   SSD1306_Init ();                                                // init lcd
@@ -74,6 +77,21 @@ int main (void)
   SSD1306_SetPosition (10, 0);
   SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);          // print decoder version
 
+  // test hello
+  // http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
+  // -------------------------------------------------------------------------------------  
+  while (1) {
+    p = HelloMP3;
+    while (p <= HelloMP3[sizeof(HelloMP3)-1]) {
+      while (VS1053_PORT & (1 << VS1053_DREQ)) {                 // wait until DREQ is high
+        VS1053_DreqWait ();                                      // DREQ Wait
+        VS1053_DeactivateData ();                                // set xDCS
+      }
+      VS1053_ActivateData ();                                    // clear xDCS
+      SPI_WriteByte (*p++);                                      // send data
+    }
+  }
+  
   // EXIT
   // -------------------------------------------------------------------------------------
   return 0;
