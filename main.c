@@ -83,12 +83,12 @@ int main (void)
   while (1) {
     p = HelloMP3;
     while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
-      while (VS1053_PORT & (1 << VS1053_DREQ)) {                 // wait until DREQ is high
+      while (VS1053_PORT & (1 << VS1053_DREQ)) {                 // wait until DREQ down
         VS1053_DreqWait ();                                      // DREQ Wait
         VS1053_DeactivateData ();                                // set xDCS
       }
       VS1053_ActivateData ();                                    // clear xDCS
-      SPI_WriteByte (*p++);                                      // send data
+      SPI_WriteByte (pgm_read_byte(p++));                        // send data
     }
   }
   
