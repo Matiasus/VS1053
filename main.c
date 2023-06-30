@@ -85,7 +85,6 @@ int main (void)
     p = HelloMP3;
     while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
       while (!(VS1053_PORT & (1 << VS1053_DREQ))) {              // DREQ wait
-        VS1053_DreqWait ();                                      // DREQ Wait
         VS1053_DeactivateData ();                                // set xDCS
       }
       VS1053_ActivateData ();                                    // clear xDCS
