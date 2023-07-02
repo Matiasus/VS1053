@@ -23,7 +23,7 @@
 
 // INCLUDE libraries
 #include "lib/vs1053.h"
-#include "lib/vs1053?_hello.h"
+#include "lib/vs1053_hello.h"
 #include "lib/lcd/ssd1306.h"
 
 /**
@@ -35,15 +35,16 @@
  */
 int main (void)
 {
-  unsigned char *p;
-  uint16_t i;
+  char *p;
+  uint16_t i = 0;
+  uint16_t endfillbyte;
   
   // init LCD SSD1306
   // -------------------------------------------------------------------------------------
   SSD1306_Init ();                                                // init lcd
   SSD1306_ClearScreen ();
   SSD1306_SetPosition (10, 0);
-  SSD1306_DrawString ("VS10XX AUDIO CODEC ", NORMAL);
+  SSD1306_DrawString ("VS10XX AUDIO CODEC", NORMAL);
 
   // init MP3 decoder
   // -------------------------------------------------------------------------------------
@@ -81,25 +82,29 @@ int main (void)
   // test hello
   // http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
   // -------------------------------------------------------------------------------------  
+  VS1053_SoftReset ();
   while (1) {
     p = HelloMP3;
     while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
       while (!(VS1053_PORT & (1 << VS1053_DREQ))) {              // DREQ wait
-        VS1053_DeactivateData ();                                // set xDCS
+        VS1053_PORT |= (1 << VS1053_XDCS);                       // set xDCS
       }
-      VS1053_ActivateData ();                                    // clear xDCS
+      VS1053_PORT &= ~(1 << VS1053_XDCS);                        // clear xDCS
       SPI_WriteByte (pgm_read_byte(p++));                        // send data
     }
     // ----------------------------------------------------------------------------------
-    VS1053_ActivateData ();                                      // clear xDCS
-    for (i = 0; i < 2048; i++) {                                 // send 2048 zeros
+    VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
+    endfillbyte = VS1053_ReadSci (SCI_WRAM);
+    VS1053_PORT &= ~(1 << VS1053_XDCS);                          // clear xDCS
+    for (i = 0; i < 2052; i++) {
       while (!(VS1053_PORT & (1 << VS1053_DREQ)))
         ;
-      SPI_WriteByte (0);                                         // send zero
+      //SPI_WriteByte (0);                                         // send zero
+      SPI_WriteByte ((uint8_t) endfillbyte & 0xFF);
     }
-    VS1053_DeactivateData ();                                    // set xDCS
+    VS1053_PORT |= (1 << VS1053_XDCS);                           // set xDCS
   }
-  
+
   // EXIT
   // -------------------------------------------------------------------------------------
   return 0;

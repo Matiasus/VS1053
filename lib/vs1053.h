@@ -110,7 +110,9 @@
 
   // Version
   #define VS10XX_VERS_MASK    0xF0
-
+  
+  #define VS10XX_ENDFILLBYTE  0x1E06
+  
   /**
    * @desc    Write Serial Command Instruction
    *

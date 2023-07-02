@@ -48,21 +48,8 @@ static inline void VS1053_ActivateReset (void) { VS1053_PORT_RES &= ~(1 << VS105
 /* Deactivate RESET / set XRST */
 static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS1053_XRST); }
 
-/**
- * @desc    DREQ Wait
- *
- * @param   void
- *
- * @return  uint8_t
- */
-static inline uint8_t VS1053_DreqWait (void)
-{
-  while (1) {
-    if (VS1053_PORT & (1 << VS1053_DREQ)) {
-      return 0;
-    }
-  }
-}
+/* DREQ Wait */
+static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_DREQ))); }
 
 /**
  * @desc    Write Serial Command Instruction / big endian /
@@ -269,8 +256,8 @@ void VS1053_Init (void)
  */
 void VS1053_SetVolume (uint8_t left, uint8_t right)
 {
-  uint16_t volume = (left << 8) | right;    // set volume integer
-  VS1053_WriteSci (SCI_VOL, volume);        // send command
+  uint16_t volume = (left << 8) | right;          // set volume integer
+  VS1053_WriteSci (SCI_VOL, volume);              // send command
 }
 
 /**
@@ -323,7 +310,7 @@ void VS1053_SineTest (uint8_t n)
   uint8_t sine_deactivate[] = {0x45, 0x78, 0x69, 0x74, 0, 0, 0, 0};
 
   VS1053_ActivateCommand ();                      // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);                 // SM_SDINEW | SM_TESTS
+  VS1053_WriteSci (SCI_MODE, 0x0820);             // SM_SDINEW | SM_TESTS
   VS1053_DeactivateCommand ();                    // set xCS
   VS1053_DreqWait ();                             // Wait until DREQ is high
 
@@ -379,7 +366,7 @@ uint16_t VS1053_memTest (void)
   uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
 
   VS1053_ActivateCommand ();                      // clear xCS
-  VS1053_WriteSci (0x00, 0x0820);                 // SM_SDINEW | SM_TESTS
+  VS1053_WriteSci (SCI_MODE, 0x0820);             // SM_SDINEW | SM_TESTS
   VS1053_DeactivateCommand ();                    // set xCS
   VS1053_DreqWait ();                             // Wait until DREQ is high
 
