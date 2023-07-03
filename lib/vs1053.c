@@ -59,15 +59,47 @@ static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_
  *
  * @return  void
  */
-void VS1053_TestHello (void)
+void VS1053_TestHello (const char *data, uint16_t size)
 {
-  char *p;
+  uint8_t i;
   uint8_t endfillbyte;
 
-  VS1053_WriteSci (SCI_MODE, 0x0840);             // SM_SDINEW | SM_STREAM
+  //VS1053_WriteSci (SCI_MODE, 0x0840);             // SM_SDINEW | SM_STREAM
   VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
   endfillbyte = VS1053_ReadSci (SCI_WRAM) & 0xFF; // read from RAM address
 
+  // Send data
+  // ----------------------------------------------------------------------------------
+  VS1053_ActivateData ();                         // clear xDCS
+  while (size) 
+  {
+    if (size > 32) {                              // too many bytes to transfer
+      size -= 32;
+    }
+    VS1053_DreqWait ();                           // wait until DREQ is high
+    for (i = 0; i < 32; i++) {                    // send data
+      SPI_WriteByte (pgm_read_byte(data++));      //
+    }                                             //
+  }
+  VS1053_DeactivateData ();                       // set xDCS
+  
+  // Send end fill byte
+  // ----------------------------------------------------------------------------------
+  size = 2052;
+  VS1053_ActivateData ();                         // clear xDCS  
+  while (size) 
+  {
+    if (size > 32) {                              // too many bytes to transfer
+      size -= 32;
+    }
+    VS1053_DreqWait ();                           // wait until DREQ is high
+    for (i = 0; i < 32; i++) {                    // send data
+      SPI_WriteByte (endfillbyte);                //
+    }                                             //
+  }
+  VS1053_DeactivateData ();                       // set xDCS  
+
+/*
   while (1) {
     p = HelloMP3;
     while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
@@ -85,6 +117,7 @@ void VS1053_TestHello (void)
     }
     VS1053_DeactivateData ();                     // set xDCS
   }
+*/
 }
 
 /**
@@ -412,7 +445,6 @@ uint16_t VS1053_memTest (void)
   VS1053_DeactivateCommand ();                    // set xCS
   _delay_ms (100);                                // wait for 500000 clock cycles ~ 41ms
   VS1053_DreqWait ();                             // Wait until DREQ is high
-
   data = VS1053_ReadSci (SCI_HDAT0);              // result read from the SCI reg SCI_HDAT0
 
   VS1053_SoftReset ();                            // soft reset
