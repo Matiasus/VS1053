@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       19.10.2022
  * @file        vs1053.c
- * @update      18.11.2022
+ * @update      03.07.2023
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -28,7 +28,7 @@
 // INCLUDE libraries
 #include "vs1053.h"
 #include "vs1053_info.h"
-//#include "vs1053_hello.h"
+#include "vs1053_hello.h"
 
 // global variables
 char buffer[VERS_TEXT_LEN];
@@ -52,6 +52,42 @@ static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS10
 static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_DREQ))); }
 
 /**
+ * @brief   Test Hello
+ *          http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_TestHello (void)
+{
+  char *p;
+  uint8_t endfillbyte;
+
+  VS1053_WriteSci (SCI_MODE, 0x0840);             // SM_SDINEW | SM_STREAM
+  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
+  endfillbyte = VS1053_ReadSci (SCI_WRAM) & 0xFF; // read from RAM address
+
+  while (1) {
+    p = HelloMP3;
+    while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
+      while (!(VS1053_PORT & (1 << VS1053_DREQ))) {
+        VS1053_DeactivateData ();                 // set xDCS
+      }
+      VS1053_ActivateData ();                     // clear xDCS
+      SPI_WriteByte (pgm_read_byte(p++));         // send data
+    }
+    // ----------------------------------------------------------------------------------
+    VS1053_ActivateData ();                       // clear xDCS
+    for (i = 0; i < 2052; i++) {
+      VS1053_DreqWait ();                         // wait until DREQ is high
+      SPI_WriteByte (endfillbyte);                // send endfillbyte
+    }
+    VS1053_DeactivateData ();                     // set xDCS
+  }
+}
+
+/**
  * @desc    Write Serial Command Instruction / big endian /
  *
  * @param   uint8_t addr
@@ -62,6 +98,7 @@ static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_
 void VS1053_WriteSci (uint8_t addr, uint16_t cmnd)
 {
   VS1053_DreqWait ();                             // wait until DREQ is high
+  VS1053_DeactivateData ();                       // set xDCS
   VS1053_ActivateCommand ();                      // clear xCS
   SPI_WriteByte (VS10XX_WRITE);                   // command code for WRITE
   SPI_WriteByte (addr);                           // SCI register number
@@ -82,6 +119,7 @@ uint16_t VS1053_ReadSci (uint8_t addr)
   uint16_t data;
 
   VS1053_DreqWait ();                             // wait until DREQ is high
+  VS1053_DeactivateData ();                       // set xDCS
   VS1053_ActivateCommand ();                      // clear xCS
   SPI_WriteByte (VS10XX_READ);                    // command code for READ
   SPI_WriteByte (addr);                           // SCI register number
@@ -123,7 +161,7 @@ void VS1053_TestSci (void)
  *
  * @return  int
  */
-int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
+void VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
 {
   uint8_t i;
 
@@ -137,8 +175,6 @@ int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
     SPI_WriteByte (*data++);                      //
   }                                               //
   VS1053_DeactivateData ();                       // set xDCS
-
-  return 0;                                       // success
 }
 /**
  * @desc    Hard reset
@@ -376,7 +412,7 @@ uint16_t VS1053_memTest (void)
   VS1053_DeactivateCommand ();                    // set xCS
   _delay_ms (100);                                // wait for 500000 clock cycles ~ 41ms
   VS1053_DreqWait ();                             // Wait until DREQ is high
-  
+
   data = VS1053_ReadSci (SCI_HDAT0);              // result read from the SCI reg SCI_HDAT0
 
   VS1053_SoftReset ();                            // soft reset
