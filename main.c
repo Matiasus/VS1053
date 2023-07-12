@@ -22,10 +22,7 @@
  */
 
 // INCLUDE libraries
-#include <stdio.h>
-#include <util/delay.h>
 #include "lib/vs1053.h"
-//#include "lib/vs1053_hello.h"
 #include "lib/lcd/ssd1306.h"
 
 /**
