@@ -28,7 +28,7 @@
 // INCLUDE libraries
 #include "vs1053.h"
 #include "vs1053_info.h"
-//#include "vs1053_hello.h"
+#include "vs1053_hello.h"
 
 // global variables
 char buffer[VERS_TEXT_LEN];
@@ -213,7 +213,7 @@ void VS1053_SoftReset (void)
   _delay_ms (1);                                  // delay
   VS1053_DreqWait ();                             // wait until DREQ is high
 
-  VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // set clock cycles / 0x9ccc in source code
+  VS1053_WriteSci (SCI_CLOCKF, 0x8800);           // set clock cycles / 0x9ccc in source code
   _delay_ms (1);                                  // delay
   VS1053_DreqWait ();                             // wait until DREQ is high
 
@@ -360,7 +360,7 @@ char * VS1053_GetVersion (void)
  *
  * @return  uint16_t
  */
-uint16_t VS1053_memTest (void)
+uint16_t VS1053_MemTest (void)
 {
   uint16_t data;
   uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
@@ -382,4 +382,56 @@ uint16_t VS1053_memTest (void)
   VS1053_SoftReset ();                            // soft reset
 
   return data;
+}
+
+/**
+ * @desc    Init
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_Hello (void)
+{
+  uint8_t endfillbyte;
+  uint16_t i = 0;
+  
+  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
+  endfillbyte = (uint8_t) VS1053_ReadSci (SCI_WRAM) & 0xff;    // Read extra parameter value endFillByte  
+
+  while (i < sizeof(HelloMP3)-1) {
+    while (!(VS1053_PORT & (1 << VS1053_DREQ))) {              // DREQ wait
+      VS1053_PORT |= (1 << VS1053_XDCS);                       // set xDCS
+    }
+    VS1053_PORT &= ~(1 << VS1053_XDCS);                        // clear xDCS
+    SPI_WriteByte (pgm_read_byte(&HelloMP3[i++]));             // send data
+  }
+  /*
+  // send at least 2052 bytes of endFillByte
+  // ----------------------------------------------------------------------------------
+  VS1053_PORT &= ~(1 << VS1053_XDCS);
+  for (i = 0; i < 2052; i++) {
+    VS1053_DreqWait ();
+    SPI_WriteByte (endfillbyte);
+  }
+  VS1053_PORT |= (1 << VS1053_XDCS);
+  // set SCI_MODE bit SM_CANCEL
+  // ----------------------------------------------------------------------------------
+  VS1053_WriteSci (SCI_MODE, (1 << SM_SDINEW) | (1 << SM_CANCEL));
+  // send at least 32 bytes of endFillByte, max 2048 bytes
+  // ----------------------------------------------------------------------------------
+  VS1053_PORT &= ~(1 << VS1053_XDCS);
+  for (i = 0; i < 2048; i++) {
+    while (!(VS1053_PORT & (1 << VS1053_DREQ)))
+      ;
+    SPI_WriteByte (endfillbyte);
+  }
+  VS1053_PORT |= (1 << VS1053_XDCS);
+  // Read SCI_MODE. If SM_CANCEL is still set, go to 5. 
+  // If SM_CANCEL hasn’t cleared after sending 2048 bytes, do a software reset
+  // ----------------------------------------------------------------------------------
+//    if (!(VS1053_ReadSci(SCI_MODE) && (1 << SM_CANCEL))) {
+    VS1053_SoftReset ();
+//    }
+    */
 }
