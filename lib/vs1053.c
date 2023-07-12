@@ -8,7 +8,7 @@
  * @author      Marian Hrinko
  * @datum       19.10.2022
  * @file        vs1053.c
- * @update      03.07.2023
+ * @update      18.11.2022
  * @version     1.0
  * @tested      AVR Atmega328p
  *
@@ -52,75 +52,6 @@ static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS10
 static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_DREQ))); }
 
 /**
- * @brief   Test Hello
- *          http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
- *
- * @param   void
- *
- * @return  void
- */
-void VS1053_TestHello (const char *data, uint16_t size)
-{
-  uint8_t i;
-  uint8_t endfillbyte;
-
-  //VS1053_WriteSci (SCI_MODE, 0x0840);             // SM_SDINEW | SM_STREAM
-  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
-  endfillbyte = VS1053_ReadSci (SCI_WRAM) & 0xFF; // read from RAM address
-
-  // Send data
-  // ----------------------------------------------------------------------------------
-  VS1053_ActivateData ();                         // clear xDCS
-  while (size) 
-  {
-    if (size > 32) {                              // too many bytes to transfer
-      size -= 32;
-    }
-    VS1053_DreqWait ();                           // wait until DREQ is high
-    for (i = 0; i < 32; i++) {                    // send data
-      SPI_WriteByte (pgm_read_byte(data++));      //
-    }                                             //
-  }
-  VS1053_DeactivateData ();                       // set xDCS
-  
-  // Send end fill byte
-  // ----------------------------------------------------------------------------------
-  size = 2052;
-  VS1053_ActivateData ();                         // clear xDCS  
-  while (size) 
-  {
-    if (size > 32) {                              // too many bytes to transfer
-      size -= 32;
-    }
-    VS1053_DreqWait ();                           // wait until DREQ is high
-    for (i = 0; i < 32; i++) {                    // send data
-      SPI_WriteByte (endfillbyte);                //
-    }                                             //
-  }
-  VS1053_DeactivateData ();                       // set xDCS  
-
-/*
-  while (1) {
-    p = HelloMP3;
-    while (p <= &HelloMP3[sizeof(HelloMP3)-1]) {
-      while (!(VS1053_PORT & (1 << VS1053_DREQ))) {
-        VS1053_DeactivateData ();                 // set xDCS
-      }
-      VS1053_ActivateData ();                     // clear xDCS
-      SPI_WriteByte (pgm_read_byte(p++));         // send data
-    }
-    // ----------------------------------------------------------------------------------
-    VS1053_ActivateData ();                       // clear xDCS
-    for (i = 0; i < 2052; i++) {
-      VS1053_DreqWait ();                         // wait until DREQ is high
-      SPI_WriteByte (endfillbyte);                // send endfillbyte
-    }
-    VS1053_DeactivateData ();                     // set xDCS
-  }
-*/
-}
-
-/**
  * @desc    Write Serial Command Instruction / big endian /
  *
  * @param   uint8_t addr
@@ -131,7 +62,6 @@ void VS1053_TestHello (const char *data, uint16_t size)
 void VS1053_WriteSci (uint8_t addr, uint16_t cmnd)
 {
   VS1053_DreqWait ();                             // wait until DREQ is high
-  VS1053_DeactivateData ();                       // set xDCS
   VS1053_ActivateCommand ();                      // clear xCS
   SPI_WriteByte (VS10XX_WRITE);                   // command code for WRITE
   SPI_WriteByte (addr);                           // SCI register number
@@ -152,7 +82,6 @@ uint16_t VS1053_ReadSci (uint8_t addr)
   uint16_t data;
 
   VS1053_DreqWait ();                             // wait until DREQ is high
-  VS1053_DeactivateData ();                       // set xDCS
   VS1053_ActivateCommand ();                      // clear xCS
   SPI_WriteByte (VS10XX_READ);                    // command code for READ
   SPI_WriteByte (addr);                           // SCI register number
@@ -194,7 +123,7 @@ void VS1053_TestSci (void)
  *
  * @return  int
  */
-void VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
+int VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
 {
   uint8_t i;
 
@@ -208,6 +137,8 @@ void VS1053_WriteSdi (const uint8_t *data, uint8_t bytes)
     SPI_WriteByte (*data++);                      //
   }                                               //
   VS1053_DeactivateData ();                       // set xDCS
+
+  return 0;                                       // success
 }
 /**
  * @desc    Hard reset
@@ -282,7 +213,7 @@ void VS1053_SoftReset (void)
   _delay_ms (1);                                  // delay
   VS1053_DreqWait ();                             // wait until DREQ is high
 
-  VS1053_WriteSci (SCI_CLOCKF, 0x9800);           // set clock cycles / 0x9ccc in source code
+  VS1053_WriteSci (SCI_CLOCKF, 0x8800);           // set clock cycles / 0x9ccc in source code
   _delay_ms (1);                                  // delay
   VS1053_DreqWait ();                             // wait until DREQ is high
 
@@ -429,7 +360,7 @@ char * VS1053_GetVersion (void)
  *
  * @return  uint16_t
  */
-uint16_t VS1053_memTest (void)
+uint16_t VS1053_MemTest (void)
 {
   uint16_t data;
   uint8_t mem_sequence[] = {0x4D, 0xEA, 0x6D, 0x54, 0, 0, 0, 0};
@@ -445,9 +376,62 @@ uint16_t VS1053_memTest (void)
   VS1053_DeactivateCommand ();                    // set xCS
   _delay_ms (100);                                // wait for 500000 clock cycles ~ 41ms
   VS1053_DreqWait ();                             // Wait until DREQ is high
+  
   data = VS1053_ReadSci (SCI_HDAT0);              // result read from the SCI reg SCI_HDAT0
 
   VS1053_SoftReset ();                            // soft reset
 
   return data;
+}
+
+/**
+ * @desc    Init
+ *
+ * @param   void
+ *
+ * @return  void
+ */
+void VS1053_Hello (void)
+{
+  uint8_t endfillbyte;
+  uint16_t i = 0;
+  
+  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ENDFILLBYTE);
+  endfillbyte = (uint8_t) VS1053_ReadSci (SCI_WRAM) & 0xff;    // Read extra parameter value endFillByte  
+
+  while (i < sizeof(HelloMP3)-1) {
+    while (!(VS1053_PORT & (1 << VS1053_DREQ))) {              // DREQ wait
+      VS1053_PORT |= (1 << VS1053_XDCS);                       // set xDCS
+    }
+    VS1053_PORT &= ~(1 << VS1053_XDCS);                        // clear xDCS
+    SPI_WriteByte (pgm_read_byte(&HelloMP3[i++]));             // send data
+  }
+  /*
+  // send at least 2052 bytes of endFillByte
+  // ----------------------------------------------------------------------------------
+  VS1053_PORT &= ~(1 << VS1053_XDCS);
+  for (i = 0; i < 2052; i++) {
+    VS1053_DreqWait ();
+    SPI_WriteByte (endfillbyte);
+  }
+  VS1053_PORT |= (1 << VS1053_XDCS);
+  // set SCI_MODE bit SM_CANCEL
+  // ----------------------------------------------------------------------------------
+  VS1053_WriteSci (SCI_MODE, (1 << SM_SDINEW) | (1 << SM_CANCEL));
+  // send at least 32 bytes of endFillByte, max 2048 bytes
+  // ----------------------------------------------------------------------------------
+  VS1053_PORT &= ~(1 << VS1053_XDCS);
+  for (i = 0; i < 2048; i++) {
+    while (!(VS1053_PORT & (1 << VS1053_DREQ)))
+      ;
+    SPI_WriteByte (endfillbyte);
+  }
+  VS1053_PORT |= (1 << VS1053_XDCS);
+  // Read SCI_MODE. If SM_CANCEL is still set, go to 5. 
+  // If SM_CANCEL hasn’t cleared after sending 2048 bytes, do a software reset
+  // ----------------------------------------------------------------------------------
+//    if (!(VS1053_ReadSci(SCI_MODE) && (1 << SM_CANCEL))) {
+    VS1053_SoftReset ();
+//    }
+    */
 }
