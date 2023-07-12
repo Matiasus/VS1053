@@ -7,7 +7,7 @@
  *
  * @author      Marian Hrinko
  * @date        19.10.2022
- * @update      18.12.2022
+ * @update      12.07.2023
  * @file        main.c
  * @version     1.0.0
  * @tested      AVR Atmega328p
