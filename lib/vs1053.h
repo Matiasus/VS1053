@@ -32,6 +32,7 @@
   #include <avr/io.h>
   #include <util/delay.h>
   #include "spi.h"
+  
 
   // PORT
   #define VS1053_DDR          SPI_DDR
@@ -207,7 +208,7 @@
    *
    * @return  uint16_t
    */
-  uint16_t VS1053_memTest (void);
+  uint16_t VS1053_MemTest (void);
 
   /**
    * @desc    Get Version
@@ -217,5 +218,14 @@
    * @return  char *
    */
   char * VS1053_GetVersion (void);
+  
+  /**
+   * @desc    Init
+   *
+   * @param   void
+   *
+   * @return  void
+   */
+  void VS1053_Hello (void);
 
 #endif
