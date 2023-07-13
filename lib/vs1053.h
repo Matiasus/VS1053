@@ -1,16 +1,15 @@
 /**
  * --------------------------------------------------------------------------------------+
- * @desc        VS1053 Driver (VLSI company)
+ * @brief       VS1053 Driver (VLSI company)
  * --------------------------------------------------------------------------------------+
  *              Copyright (C) 2022 Marian Hrinko.
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
  *
  * @author      Marian Hrinko
- * @datum       19.10.2022
- * @file        vs1053.c
- * @update      14.11.2022
+ * @date        19.10.2022
+ * @file        vs1053.h
  * @version     1.0
- * @tested      AVR Atmega328p
+ * @test        AVR Atmega328p
  *
  * @depend      spi.h, avr/io.h, util/delay.h
  * --------------------------------------------------------------------------------------+
@@ -33,7 +32,6 @@
   #include <util/delay.h>
   #include "spi.h"
   
-
   // PORT
   #define VS1053_DDR          SPI_DDR
   #define VS1053_PORT         SPI_PORT
@@ -115,7 +113,7 @@
   #define VS10XX_ENDFILLBYTE  0x1E06
   
   /**
-   * @desc    Write Serial Command Instruction
+   * @brief   Write Serial Command Instruction
    *
    * @param   uint8_t addr
    * @param   uint16_t command
@@ -125,7 +123,7 @@
   void VS1053_WriteSci (uint8_t, uint16_t);
 
   /**
-   * @desc    Read Serial Command Instruction
+   * @brief   Read Serial Command Instruction
    *
    * @param   uint8_t addr
    *
@@ -134,26 +132,53 @@
   uint16_t VS1053_ReadSci (uint8_t);
 
   /**
-   * @desc    Test SCI
+   * @brief   Write Serial Data
+   *
+   * @param   uint8_t * data
+   * @param   uint16_t bytes
+   *
+   * @return  void
+   */
+  void VS1053_WriteSdi (const uint8_t *, uint16_t);
+
+  /**
+   * @brief   Test Serial Command Instruction
    *
    * @param   void
    *
    * @return  void
    */
   void VS1053_TestSci (void);
+   
+  /**
+   * @brief   Sine Test
+   *
+   * @param   uint8_t
+   *
+   * @return  void
+   */
+  void VS1053_TestSine (uint8_t);
 
   /**
-   * @desc    Write Serial Data
+   * @brief   Memory Test
    *
-   * @param   uint8_t * data
-   * @param   uint8_t bytes
+   * @param   void
    *
-   * @return  int
+   * @return  uint16_t
    */
-  int VS1053_WriteSdi (const uint8_t *, uint8_t);
-  
+  uint16_t VS1053_TestMemory (void);
+
   /**
-   * @desc    Hard reset
+   * @brief   Sample Hello Test
+   *
+   * @param   const char *
+   *
+   * @return  void
+   */
+  void VS1053_TestSample (const char *);
+
+    /**
+   * @brief   Hard reset
    * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
    *
    * @param   void
@@ -163,7 +188,7 @@
   void VS1053_Reset (void);
 
   /**
-   * @desc    Soft reset
+   * @brief   Soft reset
    * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a2
    *
    * @param   void
@@ -173,7 +198,7 @@
   void VS1053_SoftReset (void);  
 
   /**
-   * @desc    Init
+   * @brief   Init
    *
    * @param   void
    *
@@ -182,7 +207,7 @@
   void VS1053_Init (void);
 
   /**
-   * @desc    Set volume
+   * @brief   Set volume
    *
    * @param   uint8_t
    * @param   uint8_t
@@ -190,42 +215,14 @@
    * @return  void
    */
   void VS1053_SetVolume (uint8_t, uint8_t);
-  
-  /**
-   * @desc    Test SDI - sine test
-   *
-   * @param   uint8_t
-   *
-   * @return  void
-   */
-  void VS1053_SineTest (uint8_t);
 
   /**
-   * @desc    Test SDI - memory test
-   * @src
-   *
-   * @param   void
-   *
-   * @return  uint16_t
-   */
-  uint16_t VS1053_MemTest (void);
-
-  /**
-   * @desc    Get Version
+   * @brief   Get Version
    *
    * @param   void
    *
    * @return  char *
    */
   char * VS1053_GetVersion (void);
-  
-  /**
-   * @desc    Init
-   *
-   * @param   void
-   *
-   * @return  void
-   */
-  void VS1053_Hello (void);
 
 #endif
