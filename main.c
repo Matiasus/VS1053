@@ -1,16 +1,15 @@
 /** 
  * --------------------------------------------------------------------------------------+
- * @desc        MAIN VS1053 Driver (VLSI company)
+ * @brief       MAIN VS1053 Driver (VLSI company)
  * --------------------------------------------------------------------------------------+
  *              Copyright (C) 2022 Marian Hrinko.
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
  *
  * @author      Marian Hrinko
  * @date        19.10.2022
- * @update      12.07.2023
  * @file        main.c
  * @version     1.0.0
- * @tested      AVR Atmega328p
+ * @test        AVR Atmega328p
  *
  * @depend      lib/lcd/ssd1306.h, lib/vs1053.h
  * --------------------------------------------------------------------------------------+
@@ -24,6 +23,7 @@
 // INCLUDE libraries
 #include "lib/vs1053.h"
 #include "lib/lcd/ssd1306.h"
+#include "lib/vs1053_hello.h"
 
 /**
  * @desc    Main function
@@ -76,11 +76,12 @@ int main (void)
 
   // test hello
   // http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
-  // ------------------------------------------------------------------------------------- 
-  while (1) {
-    VS1053_Hello ();      
-    _delay_ms (1500);
-  }
+  // -------------------------------------------------------------------------------------
+  SSD1306_SetPosition (1, 5);
+  SSD1306_DrawString ("VS10XX hello test", NORMAL);
+  VS1053_TestSample (HelloMP3);
+  SSD1306_SetPosition (103, 5);
+  SSD1306_DrawString ("[OK]", NORMAL);
 
   // EXIT
   // -------------------------------------------------------------------------------------
