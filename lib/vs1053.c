@@ -280,9 +280,9 @@ void VS1053_TestSample (const char * sample)
 
   while (i < sizeof(sample)-1) {
     while (!(VS1053_PORT & (1 << VS1053_DREQ))) {       // DREQ wait
-      VS1053_PORT |= (1 << VS1053_XDCS);                // set xDCS
+      VS1053_DeactivateData ();                         // set xDCS
     }
-    VS1053_PORT &= ~(1 << VS1053_XDCS);                 // clear xDCS
+    VS1053_ActivateData ();                             // clear xDCS
     SPI_WriteByte (pgm_read_byte(&sample[i++]));        // send data
   }
 /*

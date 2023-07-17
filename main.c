@@ -54,7 +54,7 @@ int main (void)
   SSD1306_SetPosition (1, 3);
   SSD1306_DrawString ("VS10XX mem test", NORMAL);
   SSD1306_SetPosition (103, 3);
-  if (VS1053_MemTest () == VS1003_MEMTEST_OK) {
+  if (VS1053_TestMemory () == VS1003_MEMTEST_OK) {
     SSD1306_DrawString ("[OK]", NORMAL);
   } else {
     SSD1306_DrawString ("[KO]", NORMAL);
@@ -64,8 +64,8 @@ int main (void)
   // -------------------------------------------------------------------------------------
   SSD1306_SetPosition (1, 4);
   SSD1306_DrawString ("VS10XX sine test", NORMAL);
-  VS1053_SineTest (VS10XX_FREQ_1kHz);                             // sine test 1kHz
-  VS1053_SineTest (VS10XX_FREQ_5kHz);                             // sine test 5kHz
+  VS1053_TestSine (VS10XX_FREQ_1kHz);                             // sine test 1kHz
+  VS1053_TestSine (VS10XX_FREQ_5kHz);                             // sine test 5kHz
   SSD1306_SetPosition (103, 4);
   SSD1306_DrawString ("[OK]", NORMAL);
 
