@@ -189,7 +189,7 @@
    *
    * @return  void
    */
-  void VS1053_TestSample (const char *);
+  uint16_t VS1053_TestSample (const char *, uint16_t);
 
   /**
    * @brief   Playback Cancel
@@ -198,7 +198,7 @@
    *
    * @return  uint8_t
    */
-  uint8_t VS1053_PlayCancel (void);  
+  uint16_t VS1053_PlayCancel (void);  
 
     /**
    * @brief   Hard reset

@@ -250,7 +250,7 @@ void VS1053_TestSine (uint8_t n)
   VS1053_WriteSdi (sine_activate, 8);                   // Sine wave data activate
   VS1053_DreqWait ();                                   // Wait until DREQ is high
   VS1053_DeactivateCommand ();                          // set xCS
-  _delay_ms (2000);                                     // delay
+  _delay_ms (1000);                                     // delay
 
   // sine wave sequence stop
   VS1053_ActivateCommand ();                            // clear xCS
@@ -295,24 +295,28 @@ uint16_t VS1053_TestMemory (void)
 /**
  * @brief   Hello Test
  *
- * @param   void
+ * @param   const char *
+ * @param   uint16_t
  *
  * @return  void
  */
-void VS1053_TestSample (const char * sample)
+uint16_t VS1053_TestSample (const char * sample, uint16_t n)
 {
-  uint16_t i;
+  uint16_t i = 0;
 
-  while (i < sizeof(sample)-1) {
+  while (i < n) {
     while (!(VS1053_PORT & (1 << VS1053_DREQ))) {       // DREQ wait
       VS1053_DeactivateData ();                         // set xDCS
     }
     VS1053_ActivateData ();                             // clear xDCS
     SPI_WriteByte (pgm_read_byte(&sample[i++]));        // send data
   }
+  
+  _delay_ms (1000);
+  
   // Cancel playback
   // ----------------------------------------------------------------------------------
-  VS1053_PlayCancel ();
+  return VS1053_ReadSci (SCI_HDAT0);
 }
 
 /**
@@ -322,7 +326,7 @@ void VS1053_TestSample (const char * sample)
  *
  * @return  uint8_t
  */
-uint8_t VS1053_PlayCancel (void)
+uint16_t VS1053_PlayCancel (void)
 {
   uint8_t endbyte;
   uint16_t i = 0;
@@ -359,12 +363,11 @@ uint8_t VS1053_PlayCancel (void)
     }
     VS1053_DeactivateData ();                           // set xDCS
     if (!(VS1053_ReadSci (SCI_MODE) && SM_CANCEL)) {    // is null SM_CANCEL?
-      return 0;                                         // exit
+      return VS1053_ReadSci (SCI_HDAT0);                // exit
     }
   } 
-  VS1053_SoftReset ();                                  // sof reset after 2048 cycles
 
-  return 0;                                             // exit
+  return VS1053_ReadSci (SCI_HDAT0);                    // exit
 }
 
 /**
