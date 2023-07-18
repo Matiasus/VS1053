@@ -11,13 +11,13 @@
  * @version     1.0.0
  * @test        AVR Atmega328p
  *
- * @depend      lib/lcd/ssd1306.h, lib/vs1053.h
+ * @depend      lib/lcd/ssd1306.h, lib/vs1053.h, lib/vs1053_hello.h
  * --------------------------------------------------------------------------------------+
  * @interface   SPI connected through 7 pins
  * @pins        5V, DGND, MOSI, DREQ,  XCS
- *              5V, MISO,  SCK, XRST, XDCS 
+ *              5V, MISO,  SCK, XRST, XDCS
  *
- * @sources     https://www.vlsi.fi/fileadmin/app_notes/vs10XXan_spi.pdf
+ * @sources     
  */
 
 // INCLUDE libraries
@@ -72,13 +72,13 @@ int main (void)
   // get version of MP3 decoder
   // -------------------------------------------------------------------------------------
   SSD1306_SetPosition (10, 0);
-  SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);          // print decoder version
+  SSD1306_DrawString (VS1053_GetVersion (), UNDERLINE);           // print decoder version
 
   // test hello
   // http://www.vsdsp-forum.com/phpbb/viewtopic.php?t=65
   // -------------------------------------------------------------------------------------
   SSD1306_SetPosition (1, 5);
-  SSD1306_DrawString ("VS10XX hello test", NORMAL);
+  SSD1306_DrawString ("VS10XX say hello", NORMAL);
   VS1053_TestSample (HelloMP3);
   SSD1306_SetPosition (103, 5);
   SSD1306_DrawString ("[OK]", NORMAL);
