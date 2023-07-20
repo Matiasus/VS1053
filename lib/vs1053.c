@@ -116,17 +116,12 @@ void VS1053_WriteSdi (const uint8_t * data, uint16_t n)
   uint16_t length;
 
   while (n) {
-
-    length = n;
-    if (n > 32) {
-      length = 32;
-    }
-    n -= length;
-
+    length = (n > 32) ? 32 : n;                         // max 32
     VS1053_DreqWait ();                                 // wait until DREQ is high
     VS1053_ActivateData ();                             // clear xDCS
     for (i = 0; i < length; i++) {                      // send data
       SPI_WriteByte (*data++);
+      n--;
     }
     VS1053_DeactivateData ();                           // set xDCS 
   } 
@@ -146,17 +141,12 @@ void VS1053_WriteSdiByte (uint8_t byte, uint16_t n)
   uint16_t length;
 
   while (n) {
-
-    length = n;
-    if (n > 32) {
-      length = 32;
-    }
-    n -= length;
-
+    length = (n > 32) ? 32 : n;                         // max 32
     VS1053_DreqWait ();                                 // wait until DREQ is high
     VS1053_ActivateData ();                             // clear xDCS
     for (i = 0; i < length; i++) {                      // send data
       SPI_WriteByte (byte);
+      n--;
     }
     VS1053_DeactivateData ();                           // set xDCS 
   } 
@@ -328,10 +318,9 @@ uint16_t VS1053_TestSample (const char * sample, uint16_t n)
  */
 uint16_t VS1053_PlayCancel (void)
 {
+  uint8_t i = 0;
+  uint8_t n = 64;
   uint8_t endbyte;
-  uint16_t i = 0;
-  uint16_t length;
-  uint16_t n = 2048;
 
   // read extra parameter - endFillByte 
   // ----------------------------------------------------------------------------------
@@ -341,6 +330,7 @@ uint16_t VS1053_PlayCancel (void)
   // send at least 2052 bytes of endFillByte
   // ----------------------------------------------------------------------------------
   VS1053_WriteSdiByte (endbyte, 2052);
+  _delay_ms (10);                                       // accor. to BALDRAM
 
   // set SCI_MODE bit SM_CANCEL
   // ----------------------------------------------------------------------------------
@@ -350,22 +340,21 @@ uint16_t VS1053_PlayCancel (void)
   // If SM_CANCEL is still set, send next 32 bytes of endfillbyte
   // If SM_CANCEL hasn't cleared after sending 2048 bytes, do a software reset
   // ----------------------------------------------------------------------------------
-  while (n) {
-    length = n;
-    if (n > 32) {
-      length = 32;
-    }
-    n -= length;
+  VS1053_ActivateData ();                               // clear xDCS
+  while (n--) {
     VS1053_DreqWait ();                                 // wait until DREQ is high
-    VS1053_ActivateData ();                             // clear xDCS
-    for (i = 0; i < length; i++) {                      // send data
+    for (i = 0; i < 32; i++) {                          // send data
       SPI_WriteByte (endbyte);
-    }
-    VS1053_DeactivateData ();                           // set xDCS
-    if (!(VS1053_ReadSci (SCI_MODE) && SM_CANCEL)) {    // is null SM_CANCEL?
+    } 
+    if (!(VS1053_ReadSci (SCI_MODE) && SM_CANCEL)) {    // is null bit SM_CANCEL?
+      VS1053_DeactivateData ();                         // set xDCS
       return VS1053_ReadSci (SCI_HDAT0);                // exit
     }
+    _delay_ms (10);                                     // accor. to BALDRAM
   } 
+  VS1053_DeactivateData ();                             // set xDCS
+  
+  VS1053_SoftReset ();                                  // software reset required
 
   return VS1053_ReadSci (SCI_HDAT0);                    // exit
 }
