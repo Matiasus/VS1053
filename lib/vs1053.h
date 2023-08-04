@@ -28,9 +28,11 @@
 #define __VS1053_H__
 
   // INCLUDE libraries
+  #include <stdio.h>
   #include <avr/io.h>
   #include <util/delay.h>
   #include "spi.h"
+  #include "lcd/ssd1306.h"
   
   // PORT
   #define VS1053_DDR              SPI_DDR
@@ -107,8 +109,6 @@
   // Frequency
   #define VS10XX_FREQ_1kHz        0x44
   #define VS10XX_FREQ_5kHz        0x54  
-  // Version mask
-  #define VS10XX_VERS_MASK        0xF0  
   // Settings
   #define VS10XX_CLOCKF_SET       0x8800
   #define VS10XX_ADDR_ENDBYTE     0x1E06
