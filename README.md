@@ -1,11 +1,11 @@
-# Library for VS10XX (VS1053)
-The main aim was create library to initialize of codec vs1053 with simple sound test - say 'hello' with atmega microcontroller.
+# Library for VS1053
+The main aim was create library to initialize codec vs1053 with atmega microcontroller to simple sound test - say 'hello'.
 
-## VS10XX Description
+## VS1053 Description
 Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf), [Application Notes VS10XX](https://www.vlsi.fi/fileadmin/app_notes/vs10XXan.pdf).
 
 ## Library
-C library is determined for controlling [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus. It contains only primitive functions for testing purposes
+C library is determined for controlling [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus. It contains only primitive functions for testing purposes.
 
 ## Hardware connection
 | PIN VS10XX | PIN ATMEGA328P | Description |
@@ -21,7 +21,7 @@ C library is determined for controlling [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO 
 | XRST | PD7 | Reset |
 
 ### Usage
-Prior defined for MCU Atmega328p with VS1053 breakboard.
+Prior defined for MCU Atmega328p, Atmega8.
 
 ### Tested
 Library was tested and proved on a **_VS1053 Breakboard_** with **_Atmega328p_**.
@@ -89,7 +89,7 @@ Init sequence (according to [source code documentation](https://www.vlsi.fi/play
 
 ## Test Functions
 - [VS1053_TestSci (void)](#) - sound test of sending command
-- [VS1053_TestSine (uint8_t)](#) - sound test of sine wave with specific frequency
+- [VS1053_TestSine (uint8_t)](#) - sound test of sine wave with specific frequency, defined 1kHz or 5kHz
 - [VS1053_TestMemory (void)](#) - memory test of particular sections ROM, RAM
 - [VS1053_TestSample (const char*, uint16_t)](#) - sound test of saying 'hello'
 
