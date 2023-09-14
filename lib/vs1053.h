@@ -11,7 +11,7 @@
  * @version     1.0
  * @test        AVR Atmega328p
  *
- * @depend      spi.h, avr/io.h, util/delay.h
+ * @depend      avr/io.h, util/delay.h, spi.h, lcd/ssd1306.h
  * --------------------------------------------------------------------------------------+
  * @interface   SPI connected through 7 pins
  * @pins        5V, DGND, MOSI, DREQ,  XCS
@@ -28,12 +28,11 @@
 #define __VS1053_H__
 
   // INCLUDE libraries
-  #include <stdio.h>
   #include <avr/io.h>
   #include <util/delay.h>
   #include "spi.h"
   #include "lcd/ssd1306.h"
-  
+
   // PORT
   #define VS1053_DDR              SPI_DDR
   #define VS1053_PORT             SPI_PORT
@@ -108,13 +107,19 @@
   #define VS10XX_WRITE            0x2
   // Frequency
   #define VS10XX_FREQ_1kHz        0x44
-  #define VS10XX_FREQ_5kHz        0x54  
+  #define VS10XX_FREQ_5kHz        0x54
   // Settings
   #define VS10XX_CLOCKF_SET       0x8800
   #define VS10XX_ADDR_ENDBYTE     0x1E06
   // Memory test ok
   #define VS1003_MEMTEST_OK       0x807f
   #define VS1053_MEMTEST_OK       0x83ff
+
+  /**
+   * +-----------------------------------------------------------------------------------+
+   * |== COMMUNICATION FUNCTIONS ========================================================|
+   * +-----------------------------------------------------------------------------------+
+   */
 
   /**
    * @brief   Write Serial Command Instruction
@@ -156,6 +161,12 @@
   void VS1053_WriteSdiByte (uint8_t, uint16_t);
 
   /**
+   * +-----------------------------------------------------------------------------------+
+   * |== TEST FUNCTIONS =================================================================|
+   * +-----------------------------------------------------------------------------------+
+   */
+
+  /**
    * @brief   Test Serial Command Instruction
    *
    * @param   void
@@ -163,7 +174,7 @@
    * @return  void
    */
   void VS1053_TestSci (void);
-   
+
   /**
    * @brief   Sine Test
    *
@@ -187,20 +198,26 @@
    *
    * @param   const char *
    *
-   * @return  void
+   * @return  uint16_t
    */
   uint16_t VS1053_TestSample (const char *, uint16_t);
 
   /**
-   * @brief   Playback Cancel
+   * +-----------------------------------------------------------------------------------+
+   * |== CONTROL FUNCTIONS ==============================================================|
+   * +-----------------------------------------------------------------------------------+
+   */
+
+  /**
+   * @brief   Init
    *
    * @param   void
    *
-   * @return  uint8_t
+   * @return  void
    */
-  uint16_t VS1053_PlayCancel (void);  
+  void VS1053_Init (void);
 
-    /**
+  /**
    * @brief   Hard reset
    * @source  https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3
    *
@@ -218,16 +235,25 @@
    *
    * @return  void
    */
-  void VS1053_SoftReset (void);  
+  void VS1053_SoftReset (void);
 
   /**
-   * @brief   Init
+   * @brief   Get Version
    *
    * @param   void
    *
-   * @return  void
+   * @return  char *
    */
-  void VS1053_Init (void);
+  char * VS1053_GetVersion (void);
+
+  /**
+   * @brief   Playback Cancel
+   *
+   * @param   void
+   *
+   * @return  uint16_t
+   */
+  uint16_t VS1053_PlayCancel (void);
 
   /**
    * @brief   Set volume
@@ -238,14 +264,5 @@
    * @return  void
    */
   void VS1053_SetVolume (uint8_t, uint8_t);
-
-  /**
-   * @brief   Get Version
-   *
-   * @param   void
-   *
-   * @return  char *
-   */
-  char * VS1053_GetVersion (void);
 
 #endif

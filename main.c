@@ -1,6 +1,6 @@
 /** 
  * --------------------------------------------------------------------------------------+
- * @brief       MAIN VS1053 Driver (VLSI company)
+ * @brief       SAY HELLO / VS1053 Driver (VLSI company)
  * --------------------------------------------------------------------------------------+
  *              Copyright (C) 2022 Marian Hrinko.
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
@@ -11,7 +11,7 @@
  * @version     1.0.0
  * @test        AVR Atmega328p
  *
- * @depend      lib/lcd/ssd1306.h, lib/vs1053.h, lib/vs1053_hello.h
+ * @depend      lib/vs1053.h, lib/vs1053_hello.h
  * --------------------------------------------------------------------------------------+
  * @interface   SPI connected through 7 pins
  * @pins        5V, DGND, MOSI, DREQ,  XCS
@@ -29,12 +29,11 @@
  *
  * @param   Void
  *
- * @return  Void
+ * @return  Int
  */
 int main (void)
 {
   uint16_t data;
-  char str[4];
 
   // init LCD SSD1306
   // -------------------------------------------------------------------------------------
@@ -57,12 +56,10 @@ int main (void)
   SSD1306_DrawString ("VS10XX memtest", NORMAL);
   SSD1306_SetPosition (103, 3);
   data = VS1053_TestMemory ();   
-  if (data == VS1053_MEMTEST_OK) {
-    SSD1306_DrawString ("[OK]", NORMAL);
-  } else {
-    sprintf (str, "%x", data);
-    SSD1306_DrawString (str, NORMAL);
+  if (data != VS1053_MEMTEST_OK) { 
+    return 0;                                                     // mem test fail
   }
+  SSD1306_DrawString ("[OK]", NORMAL);
 
   // sine test
   // -------------------------------------------------------------------------------------
@@ -86,7 +83,7 @@ int main (void)
   SSD1306_SetPosition (103, 5);
   SSD1306_DrawString ("[OK]", NORMAL);
   while (1){
-    VS1053_TestSample (HelloMP3, sizeof(HelloMP3)-1);
+    VS1053_TestSample (HelloMP3, sizeof(HelloMP3)-1);             // say Hello
   }
 
   // EXIT

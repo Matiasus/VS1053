@@ -11,7 +11,7 @@
  * @version     1.0
  * @test        AVR Atmega328p
  *
- * @depend      vs1053.h, vs1053_info.h, vs1053_hello.h
+ * @depend      vs1053.h, vs1053_info.h
  * --------------------------------------------------------------------------------------+
  * @interface   SPI connected through 7 pins
  * @pins        5V, DGND, MOSI, DREQ,  XCS
@@ -31,7 +31,7 @@
 // global variables
 char buffer[VERS_TEXT_LEN];
 
-/*
+/**
  * +------------------------------------------------------------------------------------+
  * |== STATIC FUNCTIONS ================================================================|
  * +------------------------------------------------------------------------------------+
@@ -55,9 +55,9 @@ static inline void VS1053_DeactivateReset (void) { VS1053_PORT_RES |= (1 << VS10
 /* DREQ Wait */
 static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT & (1 << VS1053_DREQ))); }
 
-/*
+/**
  * +-----------------------------------------------------------------------------------+
- * |== ELEMENTARY FUNCTIONS ===========================================================|
+ * |== COMMUNICATION FUNCTIONS ========================================================|
  * +-----------------------------------------------------------------------------------+
  */
 
@@ -154,7 +154,7 @@ void VS1053_WriteSdiByte (uint8_t byte, uint16_t n)
   VS1053_DreqWait ();                                   // wait until DREQ is high
 }
 
-/*
+/**
  * +-----------------------------------------------------------------------------------+
  * |== TEST FUNCTIONS =================================================================|
  * +-----------------------------------------------------------------------------------+
@@ -264,7 +264,7 @@ uint16_t VS1053_TestMemory (void)
 
   // hardware reset 
   // ----------------------------------------------------------------------------------  
-  VS1053_Reset ();                                      // hardware reset  
+  //VS1053_Reset ();                                      // hardware reset  
 
   // test mode setting
   // ----------------------------------------------------------------------------------  
@@ -288,7 +288,7 @@ uint16_t VS1053_TestMemory (void)
  * @param   const char *
  * @param   uint16_t
  *
- * @return  void
+ * @return  uint16_t
  */
 uint16_t VS1053_TestSample (const char * sample, uint16_t n)
 {
@@ -313,52 +313,29 @@ uint16_t VS1053_TestSample (const char * sample, uint16_t n)
 }
 
 /**
- * @brief   Playback Cancel
+ * +-----------------------------------------------------------------------------------+
+ * |== CONTROL FUNCTIONS ==============================================================|
+ * +-----------------------------------------------------------------------------------+
+ */
+
+/**
+ * @brief   Init
  *
  * @param   void
  *
- * @return  uint8_t
+ * @return  void
  */
-uint16_t VS1053_PlayCancel (void)
+void VS1053_Init (void)
 {
-  uint8_t i = 0;
-  uint8_t n = 64;
-  uint8_t endbyte;
+  VS1053_DDR |= (1 << VS1053_XDCS);                     // DATA SELECT as output
+  VS1053_DDR &= ~(1 << VS1053_DREQ);                    // DATA REQUEST as input
+  VS1053_PORT |= (1 << VS1053_DREQ);                    // DATA REQUEST pullup activate
+  VS1053_DDR_RES |= (1 << VS1053_XRST);                 // RESET as output
 
-  // read extra parameter - endFillByte
-  // ----------------------------------------------------------------------------------
-  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ADDR_ENDBYTE);
-  endbyte = (uint8_t) VS1053_ReadSci (SCI_WRAM) & 0xff;
+  SPI_PortInit ();                                      // output={MOSI;SCLK;CS} input={MISO}
+  SPI_SlowSpeedInit ();                                 // f = fclk/128 = 62500Hz
 
-  // send at least 2052 bytes of endFillByte
-  // ----------------------------------------------------------------------------------
-  VS1053_WriteSdiByte (endbyte, 2052);
-  _delay_ms (10);                                       // accor. to BALDRAM
-
-  // set SCI_MODE bit SM_CANCEL
-  // ----------------------------------------------------------------------------------
-  VS1053_WriteSci (SCI_MODE, SM_SDINEW | SM_CANCEL);
-
-  // send at least 32 bytes of endFillByte, max 2048 bytes then read SCI_MODE.
-  // If SM_CANCEL is still set, send next 32 bytes of endfillbyte
-  // If SM_CANCEL hasn't cleared after sending 2048 bytes, do a software reset
-  // ----------------------------------------------------------------------------------
-  VS1053_ActivateData ();                               // clear xDCS
-  while (n--) {
-    VS1053_DreqWait ();                                 // wait until DREQ is high
-    for (i = 0; i < 32; i++) {                          // send data
-      SPI_WriteByte (endbyte);
-    }
-    if (!(VS1053_ReadSci (SCI_MODE) && SM_CANCEL)) {    // is null bit SM_CANCEL?
-      VS1053_DeactivateData ();                         // set xDCS
-      return VS1053_ReadSci (SCI_HDAT0);                // exit
-    }
-    _delay_ms (10);                                     // accor. to BALDRAM
-  }
-  VS1053_DeactivateData ();                             // set xDCS
-  VS1053_SoftReset ();                                  // software reset required
-
-  return VS1053_ReadSci (SCI_HDAT0);                    // exit
+  VS1053_Reset ();                                      // init reset routine
 }
 
 /**
@@ -453,40 +430,7 @@ void VS1053_SoftReset (void)
   SPI_WriteByte (0);
   SPI_WriteByte (0);
   SPI_WriteByte (0);
-}
-
-/**
- * @brief   Init
- *
- * @param   void
- *
- * @return  void
- */
-void VS1053_Init (void)
-{
-  VS1053_DDR |= (1 << VS1053_XDCS);                     // DATA SELECT as output
-  VS1053_DDR &= ~(1 << VS1053_DREQ);                    // DATA REQUEST as input
-  VS1053_PORT |= (1 << VS1053_DREQ);                    // DATA REQUEST pullup activate
-  VS1053_DDR_RES |= (1 << VS1053_XRST);                 // RESET as output
-
-  SPI_PortInit ();                                      // output={MOSI;SCLK;CS} input={MISO}
-  SPI_SlowSpeedInit ();                                 // f = fclk/128 = 62500Hz
-
-  VS1053_Reset ();                                      // init reset routine
-}
-
-/**
- * @brief   Set volume
- *
- * @param   uint8_t
- * @param   uint8_t
- *
- * @return  void
- */
-void VS1053_SetVolume (uint8_t left, uint8_t right)
-{
-  uint16_t volume = (left << 8) | right;                // set volume integer
-  VS1053_WriteSci (SCI_VOL, volume);                    // send command
+  VS1053_DeactivateData ();                             // set xDCS
 }
 
 /**
@@ -509,3 +453,67 @@ char * VS1053_GetVersion (void)
 
   return buffer;                                        // return string
 }
+
+/**
+ * @brief   Playback Cancel
+ *
+ * @param   void
+ *
+ * @return  uint8_t
+ */
+uint16_t VS1053_PlayCancel (void)
+{
+  uint8_t i = 0;
+  uint8_t n = 64;
+  uint8_t endbyte;
+
+  // read extra parameter - endFillByte
+  // ----------------------------------------------------------------------------------
+  VS1053_WriteSci (SCI_WRAMADDR, VS10XX_ADDR_ENDBYTE);
+  endbyte = (uint8_t) VS1053_ReadSci (SCI_WRAM) & 0xff;
+
+  // send at least 2052 bytes of endFillByte
+  // ----------------------------------------------------------------------------------
+  VS1053_WriteSdiByte (endbyte, 2052);
+  //_delay_ms (10);                                       // accor. to BALDRAM
+
+  // set SCI_MODE bit SM_CANCEL
+  // ----------------------------------------------------------------------------------
+  VS1053_WriteSci (SCI_MODE, SM_SDINEW | SM_CANCEL);
+
+  // send at least 32 bytes of endFillByte, max 2048 bytes then read SCI_MODE.
+  // If SM_CANCEL is still set, send next 32 bytes of endfillbyte
+  // If SM_CANCEL hasn't cleared after sending 2048 bytes, do a software reset
+  // ----------------------------------------------------------------------------------
+  VS1053_ActivateData ();                               // clear xDCS
+  while (n--) {
+    VS1053_DreqWait ();                                 // wait until DREQ is high
+    for (i = 0; i < 32; i++) {                          // send data
+      SPI_WriteByte (endbyte);
+    }
+    if (!(VS1053_ReadSci (SCI_MODE) && SM_CANCEL)) {    // bit SM_CANCEL is null?
+      VS1053_DeactivateData ();                         // set xDCS
+      return VS1053_ReadSci (SCI_HDAT0);                // exit
+    }
+    _delay_ms (10);                                     // accor. to BALDRAM
+  }
+  VS1053_DeactivateData ();                             // set xDCS
+  VS1053_SoftReset ();                                  // software reset required
+
+  return VS1053_ReadSci (SCI_HDAT0);                    // exit
+}
+
+/**
+ * @brief   Set volume
+ *
+ * @param   uint8_t lef channel
+ * @param   uint8_t right channel
+ *
+ * @return  void
+ */
+void VS1053_SetVolume (uint8_t left, uint8_t right)
+{
+  uint16_t volume = (left << 8) | right;                // set volume integer
+  VS1053_WriteSci (SCI_VOL, volume);                    // send command
+}
+
