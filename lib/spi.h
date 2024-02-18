@@ -1,16 +1,15 @@
 /**
  * ---------------------------------------------------------------+
- * @desc        SPI (Master Mode)
+ * @brief       SPI (Master Mode)
  * ---------------------------------------------------------------+
  *              Copyright (C) 2022 Marian Hrinko.
  *              Written by Marian Hrinko (mato.hrinko@gmail.com)
  *
  * @author      Marian Hrinko
- * @datum       21.10.2022
+ * @date        21.09.2022
  * @file        spi.h
- * @update      14.11.2022
  * @version     1.0
- * @tested      AVR Atmega328p
+ * @test        AVR Atmega328p
  *
  * @depend      avr/io.h
  * ---------------------------------------------------------------+
@@ -23,7 +22,7 @@
 #ifndef __SPI_H__
 #define __SPI_H__
 
-  // INCLUDE libraries
+  // includes
   #include <avr/io.h>
 
   // atmega328p
@@ -31,10 +30,10 @@
 
     #define SPI_DDR           DDRB
     #define SPI_PORT          PORTB
-    #define SPI_SCK           5     // or SCLK
-    #define SPI_MISO          4     // or DO
-    #define SPI_MOSI          3     // or SDA, SDI, DI
-    #define SPI_SS            2     // or CS
+    #define SPI_SCK           PINB5     // or SCLK
+    #define SPI_MISO          PINB4     // or DO
+    #define SPI_MOSI          PINB3     // or SDA, SDI, DI
+    #define SPI_SS            PINB2     // or CS
 
     // SPI registers
     #define SPI_SPSR          SPSR
@@ -43,67 +42,46 @@
 
   #endif
 
-  /**
-   * @desc    SPI Port Init
-   *
-   * @param   void
-   *
-   * @return  void
-   */
-  void SPI_PortInit (void);
+  // SPI init definitions
+  #define SPI_MASTER          0x10
+  #define SPI_SLAVE           0x00
+  #define SPI_MODE_0          0x00
+  #define SPI_MODE_1          0x04
+  #define SPI_MODE_2          0x08
+  #define SPI_MODE_3          0x0C
+  #define SPI_MSB_FIRST       0x00
+  #define SPI_LSB_FIRST       0x20
+  #define SPI_FOSC_DIV_4      0x00
+  #define SPI_FOSC_DIV_16     0x01
+  #define SPI_FOSC_DIV_64     0x02
+  #define SPI_FOSC_DIV_128    0x03
 
   /**
-   * @desc    SPI Slow Speed Init
+   * @desc    SPI Init
    *
-   * @param   void
+   * @param   uint8_t settings
+   * @param   uint8_t 2x speed
    *
    * @return  void
    */
-  void SPI_SlowSpeedInit (void);
+  void SPI_Init (uint8_t, uint8_t);
 
   /**
-   * @desc    SPI Fast Speed Init
+   * @desc    SPI Enable
    *
    * @param   void
    *
    * @return  void
    */
-  void SPI_FastSpeedInit (void);
+  void SPI_Enable (void);
 
   /**
    * @desc    SPI Write Byte
    *
    * @param   uint8_t
    *
-   * @return  void
-   */
-  void SPI_WriteByte (uint8_t);
-
-  /**
-   * @desc    SPI Write Word / big endian (MSB first)
-   *
-   * @param   uint16_t
-   *
-   * @return  void
-   */
-  void SPI_WriteWord (uint16_t);
-
-  /**
-   * @desc    SPI Read Byte
-   *
-   * @param   void
-   *
    * @return  uint8_t
    */
-  uint8_t SPI_ReadByte (void);
-
-  /**
-   * @desc    SPI Write / Read Byte
-   *
-   * @param   uint8_t
-   *
-   * @return  uint8_t
-   */
-   uint8_t SPI_WriteReadByte (uint8_t);
-
+  uint8_t SPI_Transfer (uint8_t);
+  
 #endif

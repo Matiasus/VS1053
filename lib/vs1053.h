@@ -41,14 +41,29 @@
   #define VS1053_SCK              SPI_SCK
   #define VS1053_MOSI             SPI_MOSI
   #define VS1053_MISO             SPI_MISO
-  #define VS1053_XCS              SPI_SS
-  #define VS1053_DREQ             1
-  #define VS1053_XDCS             0
+  //#define VS1053_XCS              SPI_SS
+  //#define VS1053_DREQ             1
+  //#define VS1053_XDCS             0
 
   // RESET
-  #define VS1053_DDR_RES          DDRD
-  #define VS1053_PORT_RES         PORTD
-  #define VS1053_XRST             7
+  #define VS1053_DDR_XRES         DDRB
+  #define VS1053_PORT_XRES        PORTB
+  #define VS1053_XRES             0
+
+  // XDCS
+  #define VS1053_DDR_XDCS         DDRD
+  #define VS1053_PORT_XDCS        PORTD
+  #define VS1053_XDCS             7
+
+  // XCS
+  #define VS1053_DDR_XCS          DDRD
+  #define VS1053_PORT_XCS         PORTD
+  #define VS1053_XCS              6
+
+  // DREQ
+  #define VS1053_DDR_DREQ         DDRD
+  #define VS1053_PORT_DREQ        PORTD
+  #define VS1053_DREQ             2
 
   // REGISTERS
   // ---------------------------------------------------------------------------------------

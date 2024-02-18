@@ -37,7 +37,7 @@ int main (void)
 
   // init LCD SSD1306
   // -------------------------------------------------------------------------------------
-  SSD1306_Init ();                                                // init lcd
+  SSD1306_Init (SSD1306_ADDR);
   SSD1306_ClearScreen ();
   SSD1306_SetPosition (10, 0);
   SSD1306_DrawString ("VS10XX AUDIO CODEC", NORMAL);
