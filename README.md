@@ -8,6 +8,7 @@ Detailed information are described in [Datasheet VS1053](https://www.vlsi.fi/fil
 C library is determined for controlling [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO CODEC](https://www.vlsi.fi/fileadmin/datasheets/vs1053.pdf) using 7 pin SPI Bus. It contains only primitive functions for testing purposes.
 
 ## Hardware connection
+Connection for VS1053 MP3 Shield for Arduino Uno R3.
 | PIN VS10XX | PIN ATMEGA328P | Description |
 | :---: | :---: |  :---: |
 | 5V | 5V | Supply Voltage |
@@ -15,16 +16,16 @@ C library is determined for controlling [Ogg Vorbis/MP3/AAC/WMA/FLAC/MIDI AUDIO 
 | SCLK | PB5 | Clock for serial bus |
 | MISO | PB4 | Master IN slave OUT |
 | MOSI | PB3 | Master OUT slave IN |
-| XCS | PB2 | Chip select input |
-| DREQ | PB1 | Data request, input bus |
-| XDCS | PB0 | Data chip select |
-| XRST | PD7 | Reset |
+| XCS | PB6 | Chip select input |
+| DREQ | PD2 | Data request, input bus |
+| XDCS | PD7 | Data chip select |
+| XRES | PB0 | Reset |
 
 ### Usage
 Prior defined for MCU Atmega328p, Atmega8.
 
 ### Tested
-Library was tested and proved on a **_VS1053 Breakboard_** with **_Atmega328p_**.
+Library was tested and proved on a **_VS1053 MP3 Shield_** with **Arduino UNO R3**. The Arduino was without a bootloader installed, it was only raw Atmega328P microcontroller. This hardware configuration was chosen for simplicity
   
 ## Init sequence
 Init sequence (according to [source code documentation](https://www.vlsi.fi/player_vs1011_1002_1003/modularplayer/vs10xx_8c.html#a3)):
@@ -36,13 +37,13 @@ Init sequence (according to [source code documentation](https://www.vlsi.fi/play
 // +---------------------------------------------+
 // |            PORTs / PINs SETTINGS            |
 // |---------------------------------------------|
-// | OUTPUTs: VS10XX_MOSI, VS10XX_SCK, VS10XX_SS |
-// |          VS10XX_XDCS, VS10XX_XRST           |
-// |  INPUTs: VS10XX_MISO, VS10XX_DREQ (pullup)  |
+// | OUTPUTs:VS10XX_MOSI, VS10XX_SCK, VS10XX_XCS |
+// |         VS10XX_XDCS, VS10XX_XRES            |
+// |  INPUTs:VS10XX_MISO, VS10XX_DREQ (pullup)   |
 // +---------------------------------------------+
 //                        |
 // +---------------------------------------------+ 
-// |      SPI SLOW SPEED INIT / F = 62500Hz      |
+// |      SPI SLOW SPEED INIT / F = 125 kHz      |
 // |---------------------------------------------|
 // |     SPCR <= SET (SPE, MSTR, SPR1, SPR0)     |
 // +---------------------------------------------+
