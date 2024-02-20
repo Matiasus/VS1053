@@ -294,12 +294,12 @@ uint16_t VS1053_TestSample (const char * sample, uint16_t n)
 {
   uint16_t i = 0;
 
-  // hardware reset 
+  // reset 
   // ----------------------------------------------------------------------------------  
-  //VS1053_Reset ();                                      // hardware reset    
+  VS1053_SoftReset ();                                  //
 
   while (i < n) {
-    while (!(VS1053_PORT & (1 << VS1053_DREQ))) {       // DREQ wait
+    while (!(VS1053_PORT_DREQ & (1 << VS1053_DREQ))) {  // DREQ wait
       VS1053_DeactivateData ();                         // set xDCS
     }
     VS1053_ActivateData ();                             // clear xDCS
@@ -410,13 +410,14 @@ void VS1053_Reset (void)
   VS1053_SetVolume (0x66,0x66);                         // set volume level
 
   VS1053_SoftReset();                                   // soft reset
-  //SPI_FastSpeedInit ();                                 // f = fclk/16 * 2 = 1MHz
 
   SPI_Init (SPI_MASTER |                                // Fast Speed Init
             SPI_MODE_0 | 
             SPI_MSB_FIRST | 
-            SPI_FOSC_DIV_16, 1);                        // f = fclk/16 = 1 MHz
+            SPI_FOSC_DIV_16, 1);                        // f = fclk/16 * 2 = 2 MHz
   SPI_Enable ();
+
+  _delay_ms (10);
 }
 
 /**

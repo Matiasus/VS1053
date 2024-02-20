@@ -21,6 +21,7 @@
  */
 
 // INCLUDE libraries
+#include "lib/lcd/ssd1306.h"
 #include "lib/vs1053.h"
 #include "lib/vs1053_hello.h"
 
@@ -82,9 +83,7 @@ int main (void)
   SSD1306_DrawString ("VS10XX say hello", NORMAL);
   SSD1306_SetPosition (103, 5);
   SSD1306_DrawString ("[OK]", NORMAL);
-  while (1){
-    VS1053_TestSample (HelloMP3, sizeof(HelloMP3)-1);             // say Hello
-  }
+  VS1053_TestSample (HelloMP3, sizeof(HelloMP3)-1);             // say Hello
 
   // EXIT
   // -------------------------------------------------------------------------------------

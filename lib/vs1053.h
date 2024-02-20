@@ -31,7 +31,6 @@
   #include <avr/io.h>
   #include <util/delay.h>
   #include "spi.h"
-  #include "lcd/ssd1306.h"
 
   // PORT
   #define VS1053_DDR              SPI_DDR
@@ -41,9 +40,6 @@
   #define VS1053_SCK              SPI_SCK
   #define VS1053_MOSI             SPI_MOSI
   #define VS1053_MISO             SPI_MISO
-  //#define VS1053_XCS              SPI_SS
-  //#define VS1053_DREQ             1
-  //#define VS1053_XDCS             0
 
   // RESET
   #define VS1053_DDR_XRES         DDRB
