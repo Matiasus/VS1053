@@ -53,7 +53,7 @@ static inline void VS1053_ActivateReset (void) { VS1053_PORT_XRES &= ~(1 << VS10
 static inline void VS1053_DeactivateReset (void) { VS1053_PORT_XRES |= (1 << VS1053_XRES); }
 
 /* DREQ Wait */
-static inline void VS1053_DreqWait (void) { while (!(VS1053_PORT_DREQ & (1 << VS1053_DREQ))); }
+static inline void VS1053_DreqWait (void) { while (!(VS1053_PIN_DREQ & (1 << VS1053_DREQ))); }
 
 /**
  * +-----------------------------------------------------------------------------------+

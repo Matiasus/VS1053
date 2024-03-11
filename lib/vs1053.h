@@ -58,6 +58,7 @@
 
   // DREQ
   #define VS1053_DDR_DREQ         DDRD
+  #define VS1053_PIN_DREQ         PIND
   #define VS1053_PORT_DREQ        PORTD
   #define VS1053_DREQ             2
 
